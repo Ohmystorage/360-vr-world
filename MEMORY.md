@@ -1,4 +1,4 @@
-﻿# MEMORY.md — current snapshot (overwrite each time)
+# MEMORY.md — current snapshot (overwrite each time)
 
 Last updated: 2026-11-08 (How to page built)
 
@@ -15,11 +15,13 @@ Last updated: 2026-11-08 (How to page built)
 - Handoff system: PLAN.md / DECISIONS.md / MEMORY.md + rule in CLAUDE.md.
 - How to page (`how-to/index.html`, pictures in `how-to/shots/`): "How Ant's-Eye World Was Built" in 5 steps (Plan, Content, Assets, Build the world, Publish), same pattern as the tinker site's other How to pages; guide "Scout the Ant". This world is the example for the "Prompt a 360° World" card on tinker-with-ai.vercel.app.
 
+- On GitHub (public): https://github.com/Ohmystorage/ants-eye-world ; live via GitHub Pages: https://ohmystorage.github.io/ants-eye-world/ (world.html, how-to/). `_other-device/` is git-ignored. (2026-11-08, restored from the other device's download)
+
 ## In progress
 - Nothing running. How to page approved by the teacher.
 
 ## Next
-1. Put the world online (e.g. Vercel) so the tinker site's Example and How to buttons can link to it (How to step 5 has only "Vercel" and "VR headsets"; no live address by teacher's request).
+1. Link the tinker site (repo ai-tinkery-webpage) 'Prompt a 360° World' card: Example -> the Pages address, How to -> /how-to/. Was: put the world online so the tinker site's Example and How to buttons can link to it (How to step 5 has only "Vercel" and "VR headsets"; no live address by teacher's request).
 2. Show the cards inside a VR headset (the intro invites headset users, but cards are HTML only). Needs a one-image plan first.
 3. Other later work (only if asked): merge shapes for slow laptops/Quest (nest start view ~1560 draw calls); deploy on HTTPS for headsets; the other 5 places; the student design activity.
 4. Small open items: minimap cookie shape hidden under the pink dot; first place ~35 s walk from the nest (less now with the faster speed); button text "Read the message" vs problem card; at the exact start spot the nest rim hides the cookie.
