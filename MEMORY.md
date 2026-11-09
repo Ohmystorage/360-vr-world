@@ -15,7 +15,7 @@ Last updated: 2026-11-08 (How to page built)
 - Handoff system: PLAN.md / DECISIONS.md / MEMORY.md + rule in CLAUDE.md.
 - How to page (`how-to/index.html`, pictures in `how-to/shots/`): "How Ant's-Eye World Was Built" in 5 steps (Plan, Content, Assets, Build the world, Publish), same pattern as the tinker site's other How to pages; guide "Scout the Ant". This world is the example for the "Prompt a 360° World" card on tinker-with-ai.vercel.app.
 
-- On GitHub (public): https://github.com/Ohmystorage/ants-eye-world ; live via GitHub Pages: https://ohmystorage.github.io/ants-eye-world/ (world.html, how-to/). `_other-device/` is git-ignored. (2026-11-08, restored from the other device's download)
+- On GitHub (public): https://github.com/Ohmystorage/360-vr-world ; live via GitHub Pages: https://ohmystorage.github.io/360-vr-world/ (world.html, how-to/). `_other-device/` is git-ignored. (2026-11-08, restored from the other device's download)
 
 ## In progress
 - Nothing running. How to page approved by the teacher.
