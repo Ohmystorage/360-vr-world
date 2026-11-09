@@ -21,7 +21,7 @@ Last updated: 2026-11-08 (How to page built)
 - Nothing running. How to page approved by the teacher.
 
 ## Next
-1. Link the tinker site (repo ai-tinkery-webpage) 'Prompt a 360° World' card: Example -> the Pages address, How to -> /how-to/. Was: put the world online so the tinker site's Example and How to buttons can link to it (How to step 5 has only "Vercel" and "VR headsets"; no live address by teacher's request).
+1. (DONE 2026-11-08) tinker site card linked and deployed (tinker-with-ai.vercel.app deploys by CLI, not git: run `vercel deploy --prod` in ai-in-k12; folder is now linked).
 2. Show the cards inside a VR headset (the intro invites headset users, but cards are HTML only). Needs a one-image plan first.
 3. Other later work (only if asked): merge shapes for slow laptops/Quest (nest start view ~1560 draw calls); deploy on HTTPS for headsets; the other 5 places; the student design activity.
 4. Small open items: minimap cookie shape hidden under the pink dot; first place ~35 s walk from the nest (less now with the faster speed); button text "Read the message" vs problem card; at the exact start spot the nest rim hides the cookie.
