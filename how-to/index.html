@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How We Built Ant's-Eye World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --pink:#e0197d; --pink-dark:#a80f5b; --green:#2e9e4f; --ink:#2a1a10; --paper:#fffdf7; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: Nunito, "Segoe UI", sans-serif; color: #222;
+    background: #f8f1e3 url(../assets/intro-bg.png) center / cover no-repeat fixed;
+    min-height: 100vh;
+  }
+  .veil { position: fixed; inset: 0; background: linear-gradient(#ffffff55, #f8f1e3cc); pointer-events: none; }
+  main { position: relative; min-height: 100vh; display: flex; flex-direction: column; padding: 16px 20px; gap: 12px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  h1 { margin: 0; font: 800 clamp(18px, 2.4vw, 26px) "Baloo 2", sans-serif; color: #fff; background: var(--pink);
+       padding: 5px 20px 3px; border-radius: 999px; box-shadow: 0 3px 0 var(--pink-dark); letter-spacing: .5px; }
+  .seen { background: #fff; border-radius: 999px; padding: 6px 16px; font-weight: 800; font-size: 15px;
+          display: flex; gap: 6px; align-items: center; box-shadow: 0 2px 6px #0002; }
+  .seen i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--green); display: inline-block; }
+  .seen i.on { background: var(--green); }
+
+  .scout { display: flex; align-items: flex-start; gap: 8px; }
+  .scout svg { flex: none; }
+  .bubble { background: #fff; border-radius: 16px; padding: 8px 16px; font-weight: 700; font-size: 16px;
+            box-shadow: 0 2px 8px #0002; margin-top: 8px; max-width: 520px; }
+  .bubble b { display: block; font: 800 12px "Baloo 2", sans-serif; color: #c46a00; letter-spacing: .5px; }
+
+  .stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .hint { font: 800 22px "Baloo 2", sans-serif; color: var(--ink); background: #ffffffd9; padding: 10px 26px;
+          border-radius: 999px; box-shadow: 0 2px 8px #0002; }
+  .panel { position: relative; width: 100%; max-width: 1180px; background: var(--paper); border-radius: 20px;
+           box-shadow: 0 6px 24px #0003; padding: 20px 24px; display: grid;
+           grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: start; }
+  .panel[hidden], .hint[hidden] { display: none; }
+  .panel h2 { margin: 0; font: 800 30px "Baloo 2", sans-serif; color: var(--pink); }
+  .close { position: absolute; right: 14px; top: 12px; width: 34px; height: 34px; border-radius: 50%; border: 0;
+           background: #eee; font-size: 16px; font-weight: 800; cursor: pointer; }
+  .close:hover { background: #ddd; }
+  .desc { font-size: 17px; margin: 4px 0 14px; color: #444; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip { border: 2px solid var(--pink); color: var(--pink); background: #fff; border-radius: 999px; padding: 5px 16px;
+          font: 800 15px Nunito, sans-serif; cursor: pointer; }
+  .chip:hover { background: #fdeef5; }
+  .chip.on { background: var(--pink); color: #fff; }
+  .detail { background: #fdeef5; border-radius: 14px; padding: 12px 16px 12px 34px; margin: 0;
+            font-size: 17px; line-height: 1.7; font-weight: 700; }
+  figure { margin: 26px 0 0; background: #fff; border: 2px solid #333; border-radius: 12px; padding: 6px; }
+  figure img { width: 100%; display: block; border-radius: 8px; }
+  figcaption { font: 800 13px "Baloo 2", sans-serif; text-align: center; margin-top: 4px; letter-spacing: 1px; }
+
+  nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .step { background: #fff; border: 0; border-radius: 16px; padding: 10px 12px; box-shadow: 0 3px 0 #0002;
+          display: flex; gap: 10px; align-items: center; text-align: left; cursor: pointer; font-family: inherit; }
+  .step:hover { transform: translateY(-2px); }
+  .step .n { width: 32px; height: 32px; border-radius: 50%; background: #ffd166; font: 800 18px "Baloo 2", sans-serif;
+             display: grid; place-items: center; flex: none; }
+  .step b { font: 800 17px "Baloo 2", sans-serif; display: block; line-height: 1.1; color: #222; }
+  .step small { font-size: 12px; color: #666; }
+  .step.seen-step .n { background: var(--green); color: #fff; }
+  .step.on { outline: 3px solid var(--pink); }
+  .step.on .n { background: var(--pink); color: #fff; }
+  button:focus-visible { outline: 3px solid #f5a300; outline-offset: 2px; }
+
+  @media (max-width: 900px) {
+    .panel { grid-template-columns: 1fr; }
+    nav { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { .step:hover { transform: none; } }
+</style>
+</head>
+<body>
+<div class="veil"></div>
+<main>
+  <header>
+    <h1>HOW ANT'S-EYE WORLD WAS BUILT</h1>
+    <div class="seen" aria-live="polite">Steps seen <span id="dots"></span> <span id="count">0/5</span></div>
+  </header>
+
+  <div class="scout">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+      <g stroke="#2a1a10" stroke-width="3" stroke-linecap="round" fill="none">
+        <path d="M24 34 14 26M24 38 10 40M28 40 20 52M40 36 50 26M40 40 54 42M38 42 46 54M22 18 16 6M28 18 30 5"/>
+      </g>
+      <ellipse cx="22" cy="26" rx="10" ry="9" fill="#2a1a10"/><ellipse cx="33" cy="37" rx="7" ry="6" fill="#2a1a10"/>
+      <ellipse cx="47" cy="44" rx="12" ry="9" fill="#2a1a10"/>
+      <circle cx="19" cy="24" r="3" fill="#fff"/><circle cx="19" cy="24" r="1.5" fill="#2a1a10"/>
+    </svg>
+    <div class="bubble"><b>SCOUT THE ANT</b><span id="say"></span></div>
+  </div>
+
+  <div class="stage">
+    <div class="hint" id="hint">Click a step to open it</div>
+    <section class="panel" id="panel" hidden aria-labelledby="p-title">
+      <button class="close" id="close" aria-label="Close">✕</button>
+      <div>
+        <h2 id="p-title"></h2>
+        <p class="desc" id="p-desc"></p>
+        <div class="chips" id="chips"></div>
+        <ul class="detail" id="detail"></ul>
+      </div>
+      <figure><img id="p-img" alt=""><figcaption id="p-cap"></figcaption></figure>
+    </section>
+  </div>
+
+  <nav id="steps" aria-label="Steps"></nav>
+</main>
+
+<script>
+  var STEPS = [
+    { title: "Plan", short: "Who · goal · tools",
+      desc: "We decided who the world is for, what it should teach, and which tools to use.",
+      fig: "Start page",
+      say: "Hi! First, we decided who this world is for.",
+      btns: [
+        ["Audience", ["Grade 3 to 5 students", "Laptop and mouse; walk with arrow keys or WASD", "A VR headset makes it feel real (not required)"]],
+        ["Goal", ["Feel what life is like for a tiny ant", "Read 3 real ant problems", "Design something that helps the ants"]],
+        ["3 places", ["A cookie too big", "Giant feet at the doormat", "A web in the way"]],
+        ["Our tools", ["Claude Code and a team of AI helpers", "A-Frame for the 3D world", "HTML, CSS and JavaScript, no game engine"]]
+      ] },
+    { title: "Content", short: "Problem cards",
+      desc: "We wrote the problem cards and the start page.",
+      fig: "Problem card",
+      say: "Kids will read these cards, so the words are short and easy.",
+      btns: [
+        ["Problem cards", ["3 cards, one for each place", "Each card has the problem, why it is hard, and a design question", "“How could you help ants move heavy food home faster?”"]],
+        ["Writing rules", ["Short sentences", "Words for grades 3 to 5", "A hard word is explained right next to it"]],
+        ["Start page", ["1. Explore  2. Find  3. Design", "One big button: “Enter the Ant's-Eye World”"]]
+      ] },
+    { title: "Assets", short: "Yard at ant size",
+      desc: "We made everything in the yard at ant size.",
+      fig: "The bitten cookie",
+      say: "Look how big that cookie is! Everything is giant when you are an ant.",
+      btns: [
+        ["The yard", ["No 3D model files", "Grass, fence, house, car, cookie and person are made from shapes in code"]],
+        ["Ant size", ["You are 800 times smaller", "One blade of grass is taller than you"]],
+        ["Fonts", ["Baloo 2 for titles", "Nunito for text", "Both from Google Fonts"]],
+        ["Start picture", ["Taken inside the world itself"]]
+      ] },
+    { title: "Build the world", short: "Walk · rings · map",
+      desc: "We put it all together into one world you can walk in.",
+      fig: "Pink ring and Read button",
+      say: "Now let's snap all the pieces together!",
+      btns: [
+        ["Ant's-eye view", ["The camera sits just above the ground", "You start at the ant nest"]],
+        ["Walking", ["Arrow keys or WASD", "You can't walk through solid things"]],
+        ["Messages", ["A pink ring with an envelope marks each place", "Click “Read the message” or press Enter"]],
+        ["Mini map", ["Pink dots show where to go", "They turn into green checks after you read"]]
+      ] },
+    { title: "Publish", short: "Online link",
+      desc: "We put the world online so anyone with the link can visit.",
+      fig: "Giant feet at the doormat",
+      say: "Last step! One link, and your whole class can visit.",
+      btns: [
+        ["Vercel", ["Vercel turns our files into a website", "After a fix, we upload again and the same link shows the new version"]],
+        ["VR headsets", ["Headsets need a secure (https) link", "Vercel gives us one"]]
+      ] }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var seen = {}, open = -1, HELLO = "Hey there! Here's how this world got built, in 5 steps.";
+
+  $("steps").innerHTML = STEPS.map(function (s, i) {
+    return '<button class="step" data-i="' + i + '" aria-expanded="false"><span class="n">' + (i + 1) +
+      '</span><span><b>' + s.title + '</b><small>' + s.short + '</small></span></button>';
+  }).join("");
+
+  function paint() {
+    var n = 0;
+    [].forEach.call($("steps").children, function (b, i) {
+      b.classList.toggle("on", i === open);
+      b.classList.toggle("seen-step", !!seen[i] && i !== open);
+      b.setAttribute("aria-expanded", String(i === open));
+      if (seen[i]) n++;
+    });
+    $("dots").innerHTML = STEPS.map(function (_, i) { return '<i class="' + (seen[i] ? "on" : "") + '"></i>'; }).join(" ");
+    $("count").textContent = n + "/" + STEPS.length;
+    return n;
+  }
+
+  function pick(j) {
+    var b = STEPS[open].btns[j];
+    [].forEach.call($("chips").children, function (c, k) { c.classList.toggle("on", k === j); c.setAttribute("aria-pressed", String(k === j)); });
+    $("detail").innerHTML = "";
+    b[1].forEach(function (line) { var li = document.createElement("li"); li.textContent = line; $("detail").appendChild(li); });
+  }
+
+  function show(i) {
+    if (i === open) return hide();
+    open = i; seen[i] = true;
+    var s = STEPS[i];
+    $("p-title").textContent = (i + 1) + ". " + s.title;
+    $("p-desc").textContent = s.desc;
+    $("chips").innerHTML = s.btns.map(function (b, j) { return '<button class="chip" data-j="' + j + '">' + b[0] + '</button>'; }).join("");
+    $("p-img").src = "shots/step" + (i + 1) + ".png";
+    $("p-img").alt = s.fig;
+    $("p-cap").textContent = "FIG " + (i + 1) + " · " + s.fig.toUpperCase();
+    $("say").textContent = s.say;
+    $("hint").hidden = true;
+    $("panel").hidden = false;
+    pick(0);
+    paint();
+  }
+
+  function hide() {
+    var was = open;
+    open = -1;
+    $("panel").hidden = true;
+    $("hint").hidden = false;
+    $("say").textContent = paint() === STEPS.length ? "You've seen all 5 steps. Nice work!" : "Click another step to keep going.";
+    if (was >= 0) $("steps").children[was].focus();
+  }
+
+  $("steps").addEventListener("click", function (e) { var b = e.target.closest(".step"); if (b) show(+b.dataset.i); });
+  $("chips").addEventListener("click", function (e) { var c = e.target.closest(".chip"); if (c) pick(+c.dataset.j); });
+  $("close").addEventListener("click", hide);
+  addEventListener("keydown", function (e) { if (e.key === "Escape" && open >= 0) hide(); });
+
+  $("say").textContent = HELLO;
+  paint();
+</script>
+</body>
+</html>

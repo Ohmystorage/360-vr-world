@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" font-family="Segoe UI, Malgun Gothic, sans-serif">
+  <rect width="1400" height="1000" fill="#ece7dc"/>
+  <text x="700" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#222">시작 전 안내 페이지 시안 2 (학생용)</text>
+
+  <!-- browser frame -->
+  <rect x="40" y="58" width="960" height="920" rx="10" fill="#fff" stroke="#bbb"/>
+  <rect x="40" y="58" width="960" height="34" rx="10" fill="#e3e3e3"/>
+  <circle cx="62" cy="75" r="6" fill="#f26b5b"/><circle cx="82" cy="75" r="6" fill="#f5bf4f"/><circle cx="102" cy="75" r="6" fill="#5fc454"/>
+  <rect x="130" y="66" width="400" height="18" rx="9" fill="#fff"/>
+  <text x="142" y="80" font-size="12" fill="#555">localhost:8123/index.html</text>
+
+  <!-- hero -->
+  <rect x="40" y="92" width="960" height="300" fill="#7fb3d9"/>
+  <rect x="40" y="300" width="960" height="92" fill="#5f9a3e"/>
+  <path d="M40,300 Q100,240 160,300 Q230,220 300,300 Q380,230 460,300 Q540,220 620,300 Q700,240 780,300 Q860,220 940,300 L1000,300 L1000,310 L40,310 z" fill="#4c8a30"/>
+  <path d="M720,330 L880,300 L900,310 L900,350 L730,358 z" fill="#e0a33c"/>
+  <g fill="#a86f1c"><circle cx="770" cy="330" r="4"/><circle cx="810" cy="322" r="4"/><circle cx="850" cy="315" r="4"/><circle cx="800" cy="342" r="4"/><circle cx="845" cy="336" r="4"/></g>
+  <g transform="translate(250,330)" fill="#1c1410">
+    <ellipse cx="0" cy="0" rx="14" ry="11"/><ellipse cx="26" cy="-2" rx="11" ry="8"/><ellipse cx="58" cy="-4" rx="22" ry="15"/>
+    <path d="M-6,8 L-16,26 M2,9 L0,28 M10,8 L18,26 M-10,-8 L-22,-26 M-4,-10 L-10,-30" stroke="#1c1410" stroke-width="3" fill="none"/>
+  </g>
+  <text x="520" y="150" text-anchor="middle" font-size="44" font-weight="800" fill="#fff" stroke="#1f3b52" stroke-width="1">Ant's-Eye World</text>
+  <text x="520" y="190" text-anchor="middle" font-size="20" fill="#fff">Shrink down. Walk the yard as a tiny ant.</text>
+  <rect x="400" y="215" width="240" height="56" rx="28" fill="#e0186f"/>
+  <text x="520" y="251" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">Start as an ant ▶</text>
+
+  <!-- steps -->
+  <text x="80" y="436" font-size="24" font-weight="700" fill="#222">What will you do?</text>
+  <g font-size="16" fill="#333">
+    <rect x="80" y="455" width="270" height="110" rx="10" fill="#fff4d6"/>
+    <text x="100" y="490" font-size="22" font-weight="800">1. Explore</text>
+    <text x="100" y="520">Walk from your ant nest</text>
+    <text x="100" y="542">across a big yard.</text>
+    <rect x="370" y="455" width="270" height="110" rx="10" fill="#fde3ef"/>
+    <text x="390" y="490" font-size="22" font-weight="800">2. Find</text>
+    <text x="390" y="520">Go to the pink rings ✉.</text>
+    <text x="390" y="542">Read each ant problem.</text>
+    <rect x="660" y="455" width="300" height="110" rx="10" fill="#e3f2dc"/>
+    <text x="680" y="490" font-size="22" font-weight="800">3. Design</text>
+    <text x="680" y="520">Pick one problem. Draw and</text>
+    <text x="680" y="542">build something to fix it!</text>
+  </g>
+
+  <!-- controls -->
+  <text x="80" y="612" font-size="24" font-weight="700" fill="#222">How to play</text>
+  <g font-size="16" fill="#333">
+    <rect x="80" y="630" width="46" height="40" rx="6" fill="#eee" stroke="#999"/><text x="103" y="656" text-anchor="middle">↑</text>
+    <rect x="132" y="630" width="46" height="40" rx="6" fill="#eee" stroke="#999"/><text x="155" y="656" text-anchor="middle">W</text>
+    <text x="195" y="656">Walk: arrow keys or W A S D</text>
+    <text x="540" y="656">🖱  Look around: drag the mouse</text>
+    <rect x="80" y="685" width="70" height="40" rx="6" fill="#eee" stroke="#999"/><text x="115" y="711" text-anchor="middle">Enter</text>
+    <text x="165" y="711">Read a message when the pink button shows</text>
+    <text x="80" y="752">🗺  The map (top right) shows you and the pink rings.</text>
+    <text x="80" y="780">✔  A green check means you read that message.</text>
+  </g>
+
+  <!-- what you need -->
+  <rect x="60" y="808" width="920" height="150" rx="10" fill="#eef4fb" stroke="#c9dbee"/>
+  <text x="80" y="842" font-size="24" font-weight="700" fill="#222">What you need</text>
+  <g font-size="16" fill="#333">
+    <text x="80" y="874">💻  A laptop or Chromebook with the internet</text>
+    <text x="80" y="900">⌨️  A keyboard and a mouse</text>
+    <text x="80" y="932" font-weight="700" fill="#1f5fbf">🥽  Want to really feel like an ant? Get a VR headset ready!</text>
+  </g>
+
+  <!-- notes -->
+  <g font-size="15" fill="#333">
+    <text x="1030" y="110" font-size="18" font-weight="700" fill="#c2185b">바뀐 점</text>
+    <text x="1030" y="145">• "For teachers" 섹션 삭제</text>
+    <text x="1030" y="175">• 단계 제목을 짧게:</text>
+    <text x="1030" y="197">   1. Explore  2. Find  3. Design</text>
+    <text x="1030" y="227">• "What you need"만 남기고</text>
+    <text x="1030" y="249">   학생 말투로 다시 씀</text>
+    <text x="1030" y="279">• "Not for phones" 삭제</text>
+    <text x="1030" y="309">• VR 헤드셋: 진짜 개미처럼</text>
+    <text x="1030" y="331">   느끼고 싶으면 준비하라고 안내</text>
+
+    <text x="1030" y="391" font-size="18" font-weight="700" fill="#222">그대로</text>
+    <text x="1030" y="421">• 제목, 개미 그림, Start 버튼</text>
+    <text x="1030" y="443">• How to play (조작법)</text>
+    <text x="1030" y="465">• 안내 페이지 = index.html,</text>
+    <text x="1030" y="487">   가상 세계 = world.html</text>
+  </g>
+</svg>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" font-family="Segoe UI, Malgun Gothic, sans-serif">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bcd9f0"/><stop offset="1" stop-color="#e3eef6"/></linearGradient>
+    <g id="scene">
+      <rect width="772" height="434" fill="url(#sky)"/>
+      <rect x="0" y="0" width="250" height="260" fill="#a9826b"/>
+      <rect x="470" y="60" width="302" height="210" fill="#b8c6d6"/>
+      <rect x="530" y="110" width="80" height="70" fill="#dfe8ef" stroke="#fff" stroke-width="4"/>
+      <rect x="190" y="95" width="110" height="170" fill="#7a6250"/>
+      <path d="M0,270 L0,200 Q60,140 120,210 Q170,120 230,200 Q300,110 360,190 Q430,120 500,200 Q560,130 630,190 Q700,140 772,200 L772,270 z" fill="#5f9a3e"/>
+      <rect x="0" y="270" width="772" height="164" fill="#a9a9a6"/>
+      <path d="M0,330 L360,290 L360,300 L0,345 z" fill="#555"/>
+      <path d="M205,250 L470,205 L520,215 L520,280 L215,285 z" fill="#e0a33c"/>
+      <path d="M215,285 L520,280 L520,265 L205,252 z" fill="#c98b28"/>
+      <g fill="#a86f1c"><circle cx="300" cy="245" r="4"/><circle cx="350" cy="236" r="4"/><circle cx="400" cy="228" r="4"/><circle cx="450" cy="220" r="4"/><circle cx="330" cy="262" r="4"/><circle cx="380" cy="254" r="4"/><circle cx="430" cy="246" r="4"/><circle cx="480" cy="238" r="4"/></g>
+      <rect x="10" y="10" width="385" height="44" rx="6" fill="#fff" opacity="0.9"/>
+      <rect x="630" y="10" width="132" height="130" rx="6" fill="#4d7f3a" stroke="#fff" stroke-width="3"/>
+    </g>
+  </defs>
+  <rect width="1600" height="700" fill="#fbfaf6"/>
+  <text x="800" y="36" text-anchor="middle" font-size="26" font-weight="700" fill="#222">수정안 3: 고리 50% · 화살표 70% · 화살표를 고리 가운데로 · 고리는 완전히 사라지지 않게 · 제목 숫자 빼기</text>
+
+  <!-- NOW -->
+  <text x="410" y="78" text-anchor="middle" font-size="20" font-weight="700" fill="#888">지금 (크래커 장소)</text>
+  <g transform="translate(24,92)">
+    <use href="#scene"/>
+    <text x="20" y="30" font-size="13" font-weight="700" fill="#222">Ant's-Eye World - Place 1: A Cracker Too Big</text>
+    <text x="20" y="47" font-size="11" fill="#333">Move: arrow keys or W A S D · Look: drag the mouse · Read: click a pink ring</text>
+    <circle cx="385" cy="95" r="50" fill="none" stroke="#f59cc8" stroke-width="11"/>
+    <path d="M368,133 L402,133 L385,172 z" fill="#e0186f"/>
+    <ellipse cx="385" cy="133" rx="17" ry="4" fill="#ff5aa5"/>
+  </g>
+
+  <!-- AFTER -->
+  <text x="1190" y="78" text-anchor="middle" font-size="20" font-weight="700" fill="#c2185b">바꾼 후</text>
+  <g transform="translate(804,92)">
+    <use href="#scene"/>
+    <text x="20" y="30" font-size="13" font-weight="700" fill="#222">Ant's-Eye World - A Cracker Too Big</text>
+    <text x="20" y="47" font-size="11" fill="#333">Move: arrow keys or W A S D · Look: drag the mouse · Read: click a pink ring</text>
+    <circle cx="385" cy="158" r="25" fill="none" stroke="#f59cc8" stroke-width="5.5"/>
+    <path d="M373,145 L397,145 L385,172 z" fill="#e0186f"/>
+    <ellipse cx="385" cy="145" rx="12" ry="3" fill="#ff5aa5"/>
+    <!-- zoom inset -->
+    <rect x="560" y="150" width="200" height="110" rx="8" fill="#fff" stroke="#c2185b" stroke-width="2"/>
+    <text x="660" y="170" text-anchor="middle" font-size="12" font-weight="700" fill="#c2185b">확대</text>
+    <circle cx="660" cy="214" r="34" fill="none" stroke="#f59cc8" stroke-width="7.5"/>
+    <path d="M644,196 L676,196 L660,232 z" fill="#e0186f"/>
+    <ellipse cx="660" cy="196" rx="16" ry="4" fill="#ff5aa5"/>
+    <line x1="420" y1="160" x2="556" y2="200" stroke="#c2185b" stroke-width="1.5" stroke-dasharray="4 3"/>
+  </g>
+  <line x1="1189" y1="250" x2="1189" y2="250"/>
+
+  <!-- notes -->
+  <g font-size="16">
+    <text x="24" y="560" font-weight="700" fill="#222">바뀌는 것</text>
+    <text x="24" y="590" fill="#333">• 고리 50%, 화살표 70% · 화살표가 고리 한가운데에 들어감</text>
+    <text x="24" y="616" fill="#333">• 화살표 끝은 그대로 크래커 바로 위 · 고리와 화살표가 함께 위아래로 움직임</text>
+    <text x="24" y="642" fill="#333">• 제목 상자: "Place 1:" 숫자 빠짐 → "Ant's-Eye World - A Cracker Too Big"</text>
+
+    <text x="820" y="560" font-weight="700" fill="#222">깜빡임 (고리 진하기)</text>
+    <text x="820" y="590" fill="#333">지금:</text>
+    <circle cx="900" cy="584" r="10" fill="none" stroke="#f59cc8" stroke-width="3"/>
+    <text x="918" y="590" fill="#333">→</text>
+    <circle cx="950" cy="584" r="10" fill="none" stroke="#f59cc8" stroke-width="3" opacity="0.45"/>
+    <text x="968" y="590" fill="#333">→</text>
+    <circle cx="1000" cy="584" r="10" fill="none" stroke="#f59cc8" stroke-width="3" opacity="0"/>
+    <text x="1020" y="590" fill="#999">(잠깐 완전히 사라짐)</text>
+    <text x="820" y="626" fill="#c2185b">바꾼 후:</text>
+    <circle cx="900" cy="620" r="10" fill="none" stroke="#f59cc8" stroke-width="3"/>
+    <text x="918" y="626" fill="#333">→</text>
+    <circle cx="950" cy="620" r="10" fill="none" stroke="#f59cc8" stroke-width="3" opacity="0.65"/>
+    <text x="968" y="626" fill="#333">→</text>
+    <circle cx="1000" cy="620" r="10" fill="none" stroke="#f59cc8" stroke-width="3" opacity="0.4"/>
+    <text x="1020" y="626" fill="#c2185b">(가장 흐릴 때도 40%는 보임)</text>
+  </g>
+  <text x="800" y="685" text-anchor="middle" font-size="14" fill="#666">그림은 실제 화면을 단순하게 다시 그린 것입니다. 클릭 범위도 작아진 고리에 맞춰 줄입니다.</text>
+</svg>

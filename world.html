@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ant's-Eye World</title>
+  <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+  <script src="js/problems.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/hotspots.js"></script>
+  <style>
+    #title {
+      position: fixed; top: 12px; left: 12px; z-index: 10;
+      padding: 10px 14px; border-radius: 10px;
+      background: rgba(255, 255, 255, 0.85); color: #222;
+      font: 18px/1.4 Arial, Helvetica, sans-serif;
+      pointer-events: none; box-sizing: border-box; max-width: calc(100vw - min(220px, 32vw) - 48px);
+    }
+    #title b { font-size: 20px; }
+    /* Minimap: top right, away from the middle of the view */
+    #map {
+      position: fixed; top: 12px; right: 12px; z-index: 10;
+      width: min(220px, 32vw); aspect-ratio: 1; overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.9); border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); pointer-events: none;
+    }
+    #map canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    /* Stage 4: pointer over a hotspot (beats A-Frame's grab cursor) */
+    .a-canvas.a-mouse-cursor-hover:hover { cursor: pointer !important; }
+    /* Card pop-up: fits 1280x720, scrolls inside on small windows; Close stays visible at the bottom */
+    #card-back {
+      position: fixed; inset: 0; z-index: 10000; padding: 16px; box-sizing: border-box;  /* above A-Frame's VR button */
+      display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.45);
+    }
+    #card-back[hidden], #card-words-box[hidden], #hint[hidden], #read-btn[hidden] { display: none; }
+    #card {
+      width: 100%; max-width: 680px; max-height: 100%; overflow-y: auto; box-sizing: border-box;
+      padding: 22px 26px 0; border-radius: 14px; background: #fffdf6; color: #1a1a1a;
+      font: 20px/1.5 Arial, Helvetica, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    }
+    #card h2 { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; font-size: 28px; line-height: 1.2; }
+    #card h3 { margin: 16px 0 4px; font-size: 21px; color: #6b3200; }
+    #card p, #card ul { margin: 0; }
+    #card ul { padding-left: 24px; }
+    #card-q-box { margin-top: 18px; padding: 12px 16px; border-left: 8px solid #d4006e; border-radius: 8px; background: #fff1a8; }
+    #card-q-box h3 { margin-top: 0; }
+    #card-q { font-weight: bold; }
+    #card-foot { position: sticky; bottom: 0; padding: 14px 0 20px; background: #fffdf6; text-align: center; }
+    #card-close {
+      min-width: 160px; min-height: 52px; padding: 10px 36px; border: 0; border-radius: 10px;
+      background: #1f5fbf; color: #fff; font: bold 22px Arial, Helvetica, sans-serif; cursor: pointer;
+    }
+    #card-close:focus-visible { outline: 4px solid #ffb300; outline-offset: 3px; }
+    #hint {
+      position: fixed; left: 50%; bottom: 130px; transform: translateX(-50%); z-index: 15; padding: 12px 22px;
+      border-radius: 10px; background: rgba(20, 20, 20, 0.85); color: #fff; font: bold 22px Arial, Helvetica, sans-serif;
+      pointer-events: none; text-align: center; width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box;
+    }
+    /* Rev 4: big "Read the message" button, shown near a place (js/hotspots.js) */
+    #read-btn {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 20;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 12px 34px 10px;
+      border: 3px solid #fff; border-radius: 999px; background: #e0186f; color: #fff; cursor: pointer;
+      font: bold 26px/1.15 Arial, Helvetica, sans-serif; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+    #read-btn small { font: bold 15px/1.2 Arial, Helvetica, sans-serif; opacity: 0.92; }
+    #read-btn:hover { background: #c3115e; }
+    #read-btn:focus-visible { outline: 4px solid #ffb300; outline-offset: 3px; }
+    @media (max-width: 600px) {  /* lift it above A-Frame's VR button (bottom right) */
+      #read-btn { bottom: 84px; font-size: 22px; }
+      #hint { bottom: 190px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="title">
+    <b id="place-name">Ant's-Eye World</b><br>
+    Move: arrow keys or W A S D &middot; Look: drag the mouse &middot; Read: walk to a pink ring
+  </div>
+  <div id="map">
+    <canvas id="map-base" width="480" height="480"></canvas>
+    <canvas id="map-spots" width="480" height="480"></canvas>
+    <canvas id="map-ant" width="480" height="480"></canvas>
+  </div>
+  <!-- Stage 4: card pop-up, filled from window.ANT_PROBLEMS by js/hotspots.js -->
+  <div id="card-back" hidden>
+    <div id="card" role="dialog" aria-modal="true" aria-labelledby="card-title">
+      <h2 id="card-title"><span id="card-title-text"></span></h2>
+      <p id="card-problem"></p>
+      <h3>Why is it hard?</h3>
+      <p id="card-why"></p>
+      <div id="card-words-box">
+        <h3>Words to know</h3>
+        <ul id="card-words"></ul>
+      </div>
+      <div id="card-q-box">
+        <h3>Your design challenge</h3>
+        <p id="card-q"></p>
+      </div>
+      <div id="card-foot"><button id="card-close" type="button">Close</button></div>
+    </div>
+  </div>
+  <div id="hint" hidden></div>
+  <button id="read-btn" type="button" hidden>&#9993; Read the message<small>click or press Enter</small></button>
+
+  <!-- Scale: 1 real cm = 8 scene m (x800). Ant eye = camera at y 1.6. -->
+  <a-scene renderer="antialias: true; logarithmicDepthBuffer: true"
+           background="color: #c4e0f4"
+           fog="type: linear; color: #c4e0f4; near: 500; far: 7000"
+           cursor="rayOrigin: mouse" raycaster="objects: .hotspot; far: 6000">
+
+    <a-entity light="type: hemisphere; color: #eef7ff; groundColor: #9a8a66; intensity: 1.6"></a-entity>
+    <a-entity light="type: directional; color: #fff6e0; intensity: 2.2" position="-1 1.6 0.5"></a-entity>
+
+    <!-- Camera: worm's-eye. Rev 4: starts at the ant nest in the south-east lawn corner (at the hole's edge),
+         facing north-west into the yard (start spot = YARD.nest in the script below) -->
+    <!-- Walking: wasd-controls (WASD + arrow keys, stays on the ground); ant-walk keeps the ant in the yard
+         and out of solid things (js/components.js). Rig rotation stays 0; start yaw is set on look-controls. -->
+    <a-entity id="rig" position="1017 0 1037">
+      <a-camera id="cam" position="0 1.6 0" camera="near: 0.1; far: 12000; fov: 80"
+                look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 357.5; fly: false"
+                ant-walk></a-camera>
+    </a-entity>
+
+    <!-- Ground: base, lawn, driveway, sidewalk (walkway from porch to front fence) -->
+    <a-plane rotation="-90 0 0" position="0 -1 0" width="20000" height="20000"
+             material="color: #7d8a5c; roughness: 1"></a-plane>
+    <a-plane rotation="-90 0 0" position="540 -0.4 -150" width="1920" height="3300"
+             material="color: #5b8c38; roughness: 1"></a-plane>
+    <a-plane rotation="-90 0 0" position="-410 -0.35 0" width="20" height="2160"
+             material="color: #6b5034; roughness: 1"></a-plane>
+    <a-plane rotation="-90 0 0" position="-1155 -0.8 0" width="990" height="3600"
+             material="color: #34363a; roughness: 1"></a-plane>
+    <a-box id="sidewalk" position="-540 -1 680" width="240" height="2" depth="1640"
+           material="color: #aab0b5; roughness: 1"></a-box>
+    <!-- Concrete landing at the foot of the porch steps (the walkway leads here) -->
+    <a-box id="landing" position="-340 -1 -350" width="840" height="2" depth="420"
+           material="color: #aab0b5; roughness: 1"></a-box>
+    <a-entity id="joints"></a-entity>
+
+    <!-- Place 1 (id heavy-cracker): a bitten M&M cookie (18 cm across real), west edge propped on a stone.
+         Cookie, toppings, stone and crumbs are built in the script below (2 merged meshes). -->
+    <a-entity id="place-heavy-cracker">
+      <!-- A cut grass blade lying on the sidewalk -->
+      <a-box position="-560 0.2 330" rotation="0 30 0" width="2.8" height="0.35" depth="55"
+             material="color: #6a9a3a; roughness: 1"></a-box>
+    </a-entity>
+    <a-entity id="detail"></a-entity>
+
+    <!-- Backdrop: our house (wall face at z = -1280), porch, garage door, roof.
+         Moved 520 m south in the 3-place version so the doormat is ~11 s from the cookie. -->
+    <a-box position="-400 1400 -1680" width="4400" height="2800" depth="800" material="color: #efe3c8; roughness: 1"></a-box>
+    <a-box position="-400 2944 -1430" rotation="30 0 0" width="4600" height="60" depth="620" color="#6b4f45"></a-box>
+    <a-box position="-400 2944 -1930" rotation="-30 0 0" width="4600" height="60" depth="620" color="#6b4f45"></a-box>
+    <a-box position="-1180 850 -1275" width="900" height="1700" depth="20" color="#f4f1ea"></a-box>
+    <a-box position="-1180 500 -1263" width="900" height="12" depth="4" color="#c9c4b8"></a-box>
+    <a-box position="-1180 900 -1263" width="900" height="12" depth="4" color="#c9c4b8"></a-box>
+    <a-box position="-1180 1300 -1263" width="900" height="12" depth="4" color="#c9c4b8"></a-box>
+    <a-box position="400 1700 -1275" width="1000" height="1000" depth="20" color="#ffffff"></a-box>
+    <a-box position="400 1700 -1264" width="880" height="880" depth="10" color="#8fb3cc"></a-box>
+    <a-box position="1200 1700 -1275" width="1000" height="1000" depth="20" color="#ffffff"></a-box>
+    <a-box position="1200 1700 -1264" width="880" height="880" depth="10" color="#8fb3cc"></a-box>
+    <!-- Porch: steps 18 cm real = 144 m each; bottom step front face at z = -560 -->
+    <a-box position="-440 216 -1160" width="500" height="432" depth="240" color="#b9b4aa"></a-box>
+    <a-box position="-440 144 -920" width="500" height="288" depth="240" color="#c2bdb3"></a-box>
+    <a-box position="-440 72 -680" width="500" height="144" depth="240" color="#cbc6bc"></a-box>
+    <!-- Step nosings (lighter edge that sticks out 1 cm) and a dark dirt line at the bottom step's base -->
+    <a-box position="-440 139 -556" width="510" height="10" depth="16" color="#dedad2"></a-box>
+    <a-box position="-440 283 -796" width="510" height="10" depth="16" color="#dedad2"></a-box>
+    <a-box position="-440 427 -1036" width="510" height="10" depth="16" color="#dedad2"></a-box>
+    <a-box position="-440 2 -559" width="502" height="4" depth="4" color="#5e5850"></a-box>
+    <a-box position="-440 1257 -1271" width="760" height="1650" depth="20" color="#7a3b2a"></a-box>
+    <!-- Place 6 (giant-feet): doormat, crumbs, shoe and print are built in the script below -->
+    <a-entity id="place-giant-feet"></a-entity>
+    <!-- Place 8 (fence-web): fence, garden bed, web, spider, hose and dandelions are built in the script below -->
+    <a-entity id="place-fence-web"></a-entity>
+    <!-- Low hedge on the play area's east edge and the lawn's south edge (one merged mesh, built in the script below) -->
+    <a-entity id="yard-hedge"></a-entity>
+    <!-- West edge: low brick border with the family car parked behind it. South edge on the walkway and driveway:
+         white picket fence with a closed garden gate and driveway gate (two merged meshes, built in the script below) -->
+    <a-entity id="yard-edges"></a-entity>
+    <!-- Rev 4: ant nest entrance in the south-east lawn corner, where the game starts (merged mesh, built in the script below) -->
+    <a-entity id="yard-nest"></a-entity>
+
+    <!-- Backdrop: neighbor's house to the east -->
+    <a-box position="4300 1300 1700" width="3000" height="2600" depth="2600" material="color: #bcd3e6; roughness: 1"></a-box>
+    <a-box position="3450 3091 1700" rotation="0 0 30" width="1963" height="60" depth="2900" color="#5a5f6b"></a-box>
+    <a-box position="5150 3091 1700" rotation="0 0 -30" width="1963" height="60" depth="2900" color="#5a5f6b"></a-box>
+    <!-- Side wall facing our yard (x = 2800): trim, windows, door, gutter, downspout, bushes -->
+    <a-box position="2790 150 1700" width="20" height="300" depth="2640" color="#8e8a82"></a-box>
+    <a-box position="2790 1300 410" width="20" height="2600" depth="80" color="#ffffff"></a-box>
+    <a-box position="2790 1300 2990" width="20" height="2600" depth="80" color="#ffffff"></a-box>
+    <a-box position="2770 2610 1700" width="80" height="80" depth="2700" color="#e8e8e8"></a-box>
+    <a-cylinder position="2760 1300 460" radius="40" height="2600" color="#d8d8d8"></a-cylinder>
+    <a-box position="2700 40 460" width="160" height="60" depth="80" color="#d8d8d8"></a-box>
+    <a-box position="2792 900 1750" width="20" height="1800" depth="760" color="#ffffff"></a-box>
+    <a-box position="2781 850 1750" width="6" height="1700" depth="640" color="#3d6b4f"></a-box>
+    <a-sphere position="2772 850 1990" radius="35" color="#d9b54a"></a-sphere>
+    <a-box position="2690 72 1750" width="220" height="144" depth="900" color="#b9b4aa"></a-box>
+    <a-entity id="neighbor-side"></a-entity>
+
+    <!-- Backdrop: neighbor's house to the west, across the driveway -->
+    <a-box position="-5200 1300 300" width="3000" height="2600" depth="3400" material="color: #e8c9a8; roughness: 1"></a-box>
+    <a-box position="-4350 3091 300" rotation="0 0 30" width="1963" height="60" depth="3700" color="#7a5a4a"></a-box>
+    <a-box position="-6050 3091 300" rotation="0 0 -30" width="1963" height="60" depth="3700" color="#7a5a4a"></a-box>
+    <a-box position="-3695 1500 300" width="20" height="900" depth="900" color="#8fb3cc"></a-box>
+  </a-scene>
+
+  <script>
+    // Shared yard layout (scene metres; x = east, z = south, camera starts facing east).
+    // 3-place version (teacher's decision): walk order cookie -> doormat -> web
+    // ("sidewalk -> house -> garden"). Walking speed ~65 m/s (wasd acceleration 357.5 = teacher's +30% over 275,
+    //   which was +20% over 229.2). Edge to edge ~38 s.
+    // Zones: driveway x -1650..-660, walkway x -660..-420 (z -140..1500),
+    // porch landing x -760..60 (z -560..-140), porch steps x -690..-190 (z -1280..-560),
+    // lawn x -420..1500, house wall z -1280.
+    // fence-web: wooden fence along x 360..456 from the house wall (z -1280) to the end post
+    // (z -575..-495); web hub at (424, 85, -660); garden bed x 494..1170, z -800..-280.
+    // The web covers the only opening in the fence (rotted board ends, z -718..-575); a strawberry lies
+    // just past it at (475, -655), in the soil strip between the boards and the bed.
+    // placed: false = card kept in the data but NOT placed in the 3-place version (nothing drawn).
+    // tip = stage 4 hotspot: height (m) of the old arrow tip above the place's x, z; the envelope icon in the pulsing
+    // ring's center sits just above it. Chosen to clear the cookie (raised west edge ~96 m; the ring sits above it in the
+    // near views), the mat (~17 m) and the web (top 164 m).
+    // Rev 4: the game always starts at the ant nest (YARD.nest); the ?place= shortcut is gone.
+    window.PLACES = [
+      { id: "heavy-cracker", x: -540,  z: 400,  placed: true, tip: 110 },  // the cookie: sidewalk, between driveway and lawn
+      { id: "giant-feet",    x: -440,  z: -380, placed: true, tip: 30 },   // doormat at the bottom of the porch steps
+      { id: "fence-web",     x: 400,   z: -660, placed: true, tip: 178 },  // web under the bottom rail by the fence end post
+      { id: "nest-guard",    x: 850,   z: -150, placed: false },
+      { id: "rain-flood",    x: 1250,  z: 500,  placed: false },
+      { id: "hot-driveway",  x: -1150, z: -350, placed: false },
+      { id: "lost-trail",    x: 600,   z: -900, placed: false },
+      { id: "sidewalk-gap",  x: -540,  z: 1350, placed: false }
+    ];
+
+    // ONE shared footprint list (stage 3): js/components.js uses it for walking limits AND the minimap,
+    // so the two cannot drift apart. Numbers copied from the 3D objects below (scene m, x = east, z = south).
+    // Box: x, z = center, w = size along x, d = size along z, rot = y rotation in degrees. Circle: x, z, r.
+    // No color = solid but not drawn on the map. Grass blades are not here: the ant walks between them.
+    window.YARD = {
+      // Play area. Edge to edge about 2470 m = about 35 s at 70 m/s. The east edge (x 1170) is the garden
+      // bed's east end, so there is no way around the bed: the strawberry can only be reached through the web.
+      // A low hedge stands along that edge (west face at x 1170) and along the lawn part of the south edge
+      // (north face at z 1200, x -420..1170), so the ant stops at a visible wall there.
+      // Rev 3: the west edge (x -1300) is a low brick border with the family car parked behind it, and the
+      // walkway/driveway part of the south edge is a white picket fence with gates (north face z 1198).
+      bounds: { x0: -1300, x1: 1170, z0: -1280, z1: 1200 },
+      zones: [  // walkable ground, drawn on the minimap only
+        { x: 540,   z: -150, w: 1920, d: 3300, color: "#5b8c38" },  // lawn
+        { x: -1155, z: 0,    w: 990,  d: 3600, color: "#34363a" },  // driveway
+        { x: -540,  z: 680,  w: 240,  d: 1640, color: "#aab0b5" },  // walkway / sidewalk
+        { x: -340,  z: -350, w: 840,  d: 420,  color: "#aab0b5" },  // porch landing
+        { x: -2124, z: -40,  w: 1552, d: 2480, color: "#9d968a" }   // gravel parking strip under the car
+      ],
+      solids: [
+        { name: "house",         x: -400,   z: -1680, w: 4400, d: 800,  color: "#efe3c8" },
+        { name: "garage door",   x: -1180,  z: -1275, w: 900,  d: 20 },  // sticks out 15 m from the wall (rev 3 fix)
+        { name: "porch steps",   x: -440,   z: -914,  w: 510,  d: 732,  color: "#c9c4ba", edge: "#8f8a80" },
+        { name: "doormat",       x: -440,   z: -380,  w: 480,  d: 320,  color: "#b8864e", edge: "#1e1d1b" },
+        // Rev 4: the person's right shoe standing on the first porch step (the lifted left shoe is overhead: not solid)
+        { name: "standing shoe", x: -400,   z: -680,  w: 86,   d: 236,  color: "#3d6db3" },
+        // Cookie (radius 72 m) and the stone under its raised west edge (ground cross-section). The map draws the
+        // cookie's real outline with the bite (poly, set where the cookie is built); walking uses the circle.
+        { name: "cookie",        x: -540,   z: 400,   r: 72,            color: "#d9a35c", edge: "#8a5a2b" },
+        { name: "cookie stone",  x: -620,   z: 400,   r: 33 },
+        { name: "fence",         x: 448,    z: -887,  w: 18,   d: 788,  color: "#6b4f35" },
+        { name: "fence post",    x: 400,    z: -900,  w: 80,   d: 80,   color: "#6b4f35" },
+        { name: "end post",      x: 400,    z: -535,  w: 80,   d: 80,   color: "#6b4f35" },
+        // Spider web (plane x 424, z -770..-575 with its anchor threads), not on the map. The block starts
+        // 24 m in front of the web, so the ant stops where the whole web is in view, strawberry behind it.
+        { name: "spider web",    x: 420,    z: -672,  w: 40,   d: 194 },
+        { name: "garden bed",    x: 832,    z: -540,  w: 676,  d: 520,  color: "#3b2a1e", edge: "#8b6f4e" },
+        { name: "bed edging",    x: 479,    z: -497,  w: 54,   d: 24,   color: "#8b6f4e" },
+        { name: "flower pot",    x: 445,    z: -438,  r: 62,            color: "#c4683f" },  // base radius (rim 86 is overhead)
+        // Low hedge: east edge x 1170..1470 from the house wall (z -1290) to past the south edge (z 1310),
+        // and the lawn's south edge z 1200..1500 from x -420 (walkway side) to the east hedge
+        { name: "hedge east",    x: 1320,   z: 10,    w: 300,  d: 2600, color: "#2e5a22" },
+        { name: "hedge south",   x: 440,    z: 1350,  w: 1720, d: 300,  color: "#2e5a22" },
+        // West edge: low brick border (east face x -1300) from the garage door (z -1265) to the front fence.
+        // The car stands right behind it (on the map only in practice: the border stops the ant first).
+        { name: "brick border",  x: -1324,  z: -33,   w: 48,   d: 2463, color: "#7a3e2a" },
+        { name: "car",           x: -1988,  z: -10,   w: 1280, d: 2320, color: "#c0392b" },
+        // Front fence + gates on the walkway and driveway part of the south edge, x -3000..-340 (north face z 1198)
+        { name: "front fence",   x: -1670,  z: 1218,  w: 2660, d: 40,   color: "#f4f2ec" },
+        { name: "neighbor east", x: 4300,   z: 1700,  w: 3000, d: 2600, color: "#bcd3e6" },
+        { name: "neighbor west", x: -5200,  z: 300,   w: 3000, d: 3400, color: "#e8c9a8" }
+        // Rev 4: the nest's soil rim blobs are pushed in below (circles, not drawn; the map draws YARD.nest)
+      ],
+      // Rev 4: ant nest entrance in the south-east lawn corner. r = outer size (map), hole = hole radius.
+      // The game starts at the hole's north-west edge, facing north-west (all 3 places are > 1600 m away).
+      nest: { x: 1030, z: 1050, r: 100, hole: 16 }
+    };
+
+    (function () {
+      var cards = window.ANT_PROBLEMS || [];
+      PLACES.forEach(function (p) {
+        if (!cards.some(function (c) { return c.id === p.id; })) console.warn("No card for place id:", p.id);
+      });
+      // The title box is updated by ant-walk (js/components.js) with the place the ant is near.
+      var placed = PLACES.filter(function (p) { return p.placed; });
+      // Rev 4: start at the nest hole's north-west edge (18 m from its center), facing north-west, tilted up a little
+      var N = YARD.nest, START = { x: N.x - 12.7, z: N.z - 12.7, yaw: 45, tilt: 10 };
+      document.getElementById("rig").setAttribute("position", START.x + " 0 " + START.z);
+
+      // Seeded random so the scene looks the same every time.
+      var seed = 7;
+      function r() {
+        seed = seed + 0x6D2B79F5 | 0;
+        var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+      function pick(a) { return a[Math.floor(r() * a.length)]; }
+      function add(parent, tag, attrs) {
+        var el = document.createElement(tag);
+        for (var k in attrs) el.setAttribute(k, attrs[k]);
+        parent.appendChild(el);
+        return el;
+      }
+      var detail = document.getElementById("detail");
+      var CAM = { x: -594, z: 420 };
+
+      // Sidewalk joints (6-8 mm grooves = ~6 m), every 150 m; one passes just left of the start spot
+      var joints = document.getElementById("joints");
+      // Walkway starts at the landing edge (z -140): one joint there, then the old 150 m grid
+      for (var jz = -40; jz < 1500; jz += 150) {
+        add(joints, "a-plane", { rotation: "-90 0 0", position: "-540 0.05 " + jz, width: 240, height: 6,
+          material: "color: #5c5b59; roughness: 1" });
+      }
+      add(joints, "a-plane", { rotation: "-90 0 0", position: "-540 0.05 -140", width: 240, height: 6,
+        material: "color: #5c5b59; roughness: 1" });
+
+      // Giant grass at the lawn edge (unmowed edge, blades 8-14 cm real = 64-112 m). Next to the cookie
+      // (within 260 m of z 400) the blades are cut short (18% height) so the cookie shows from the lawn.
+      // Same random calls in the same order as before, so all later detail stays the same.
+      var GREENS = ["#4c8a2e", "#5a9e34", "#3f7a28", "#6bb03f", "#4f9a3a"];
+      for (var row = 0; row < 4; row++) for (var z = -100; z <= 900; z += 10) {
+        var h = 64 + r() * 48, bx = -414 + row * 14 + r() * 10, bz = z + r() * 8;
+        if (Math.abs(bz - 400) < 260) h *= 0.18;
+        add(detail, "a-cone", {
+          position: bx + " " + (h / 2 - 1) + " " + bz,
+          rotation: (r() * 16 - 8) + " " + (r() * 360) + " " + (r() * 16 - 8),
+          "radius-bottom": 2.5 + r() * 2, "radius-top": 0.15, height: h,
+          "segments-radial": 3, "segments-height": 1,
+          material: "color: " + pick(GREENS) + "; roughness: 1; side: double"
+        });
+      }
+
+      // Old cracker footprint: pebbles there are still skipped so the random sequence (and all later detail) stays the same
+      function inCracker(x, z) { return x > -566 && x < -514 && Math.abs(z - 400) < 28; }
+
+      // Pebbles on the sidewalk (1-6 mm real = 0.5-2.6 m)
+      var STONES = ["#8a7560", "#6b5d4f", "#a8906e", "#7a7a76"];
+      for (var i = 0; i < 28; i++) {
+        var px = -655 + r() * 230, pz = 290 + r() * 230, pr = 0.5 + r() * 2.1, sy = 0.6 + r() * 0.3;
+        if (inCracker(px, pz) || Math.hypot(px - CAM.x, pz - CAM.z) < 5) continue;
+        add(detail, "a-sphere", {
+          position: px + " " + (pr * sy * 0.6) + " " + pz, radius: pr, scale: "1 " + sy + " " + (0.8 + r() * 0.4),
+          rotation: "0 " + (r() * 360) + " 0", "segments-width": 7, "segments-height": 5,
+          material: "color: " + pick(STONES) + "; roughness: 1; flatShading: true"
+        });
+      }
+
+      // Sand grains at the ant's feet (0.1-0.4 mm real = 0.05-0.35 m)
+      var SAND = ["#c9a66a", "#dcc08a", "#a8895c", "#ead9b0"];
+      for (i = 0; i < 110; i++) {
+        var a = r() * Math.PI * 2, d = 2.5 + r() * 26, sx = CAM.x + Math.cos(a) * d, sz = CAM.z + Math.sin(a) * d;
+        if (sx < -655) continue;
+        var sr = 0.05 + r() * 0.3;
+        add(detail, "a-sphere", { position: sx + " " + (sr * 0.7) + " " + sz, radius: sr,
+          "segments-width": 6, "segments-height": 4, material: "color: " + pick(SAND) + "; roughness: 1" });
+      }
+
+      // (Old cracker crumbs removed; the cookie crumbs are built at the end. Their 20 random numbers are still
+      // drawn so all later detail stays the same.)
+      for (i = 0; i < 20; i++) r();
+
+      // Rough asphalt edge: grit of 1-5 mm real = 1-4 m bumps
+      var TAR = ["#2a2b2e", "#3d3f43", "#4a4a4a"];
+      for (i = 0; i < 70; i++) {
+        var gr = 1 + r() * 3;
+        add(detail, "a-sphere", { position: (-740 + r() * 78) + " " + (-0.8 + gr * 0.3) + " " + (250 + r() * 370),
+          radius: gr, scale: "1 0.6 1", "segments-width": 6, "segments-height": 4,
+          material: "color: " + pick(TAR) + "; roughness: 1; flatShading: true" });
+      }
+
+      // Broken asphalt lip along the driveway edge (2.5-6 mm real = 2-5 m high), cracks between pieces,
+      // light stones (aggregate) showing on the broken face
+      var ROCK = ["#c9c4ba", "#a59f94", "#b8a68a"];
+      for (var lz = 150; lz < 700;) {
+        var len = 25 + r() * 45, lh = 2 + r() * 3;
+        add(detail, "a-box", { position: (-668 + r() * 3) + " " + (lh / 2 - 0.8) + " " + (lz + len / 2),
+          width: 16, height: lh, depth: len, rotation: (r() * 4 - 2) + " " + (r() * 6 - 3) + " " + (r() * 4 - 2),
+          material: "color: " + pick(TAR) + "; roughness: 1" });
+        for (var k = 0; k < 6; k++) {
+          var ar = 0.3 + r() * 0.5;
+          add(detail, "a-sphere", { position: (-660 + r() * 0.6) + " " + (-0.6 + r() * (lh - 0.6)) + " " + (lz + r() * len),
+            radius: ar, "segments-width": 5, "segments-height": 3,
+            material: "color: " + pick(ROCK) + "; roughness: 1; flatShading: true" });
+        }
+        lz += len + 1.5 + r() * 3;
+      }
+      // Chunks broken off the lip, lying on the sidewalk
+      for (i = 0; i < 5; i++) {
+        var cs = 3 + r() * 5;
+        add(detail, "a-box", { position: (-656 + r() * 20) + " " + (cs * 0.15) + " " + (260 + r() * 380),
+          width: cs, height: 1 + r() * 1.5, depth: cs * (0.6 + r() * 0.6),
+          rotation: (r() * 30 - 15) + " " + (r() * 360) + " " + (r() * 30 - 15),
+          material: "color: " + pick(TAR) + "; roughness: 1" });
+      }
+      // Loose gravel and asphalt bits on the sidewalk by the edge (1-4 mm real)
+      for (i = 0; i < 40; i++) {
+        var gx = -658 + r() * 58, gz = 250 + r() * 370, gb = 0.4 + r() * 1.1;
+        if (Math.hypot(gx - CAM.x, gz - CAM.z) < 5) continue;
+        add(detail, "a-sphere", { position: gx + " " + (gb * 0.5) + " " + gz, radius: gb,
+          "segments-width": 5, "segments-height": 3, rotation: "0 " + (r() * 360) + " 0",
+          material: "color: " + pick(r() < 0.5 ? TAR : ROCK) + "; roughness: 1; flatShading: true" });
+      }
+      // Driveway surface past the lip: dark cracks and light gravel
+      for (i = 0; i < 8; i++) {
+        add(detail, "a-plane", { rotation: "-90 0 " + (r() * 180), position: (-1000 + r() * 300) + " -0.75 " + (150 + r() * 550),
+          width: 40 + r() * 80, height: 1.5, material: "color: #18191b; roughness: 1" });
+      }
+      for (i = 0; i < 50; i++) {
+        var dg = 0.6 + r() * 1.4;
+        add(detail, "a-sphere", { position: (-900 + r() * 220) + " " + (-0.8 + dg * 0.4) + " " + (150 + r() * 550),
+          radius: dg, "segments-width": 5, "segments-height": 3,
+          material: "color: " + pick(ROCK) + "; roughness: 1; flatShading: true" });
+      }
+      // Asphalt patch over a broken sidewalk corner, reaching toward the start spot (1-1.5 mm thick real)
+      [[-640, 425, 40, 50, 10], [-618, 442, 24, 30, -18], [-648, 470, 24, 30, 25]].forEach(function (p) {
+        var ph = 0.9 + r() * 0.5;
+        add(detail, "a-box", { position: p[0] + " " + (ph / 2) + " " + p[1], width: p[2], height: ph, depth: p[3],
+          rotation: "0 " + p[4] + " 0", material: "color: #2f3034; roughness: 1" });
+        for (var k = 0; k < 6; k++) {
+          var pr2 = 0.3 + r() * 0.5;
+          add(detail, "a-sphere", { position: (p[0] + r() * p[2] * 0.8 - p[2] * 0.4) + " " + ph + " " + (p[1] + r() * p[3] * 0.8 - p[3] * 0.4),
+            radius: pr2, "segments-width": 5, "segments-height": 3,
+            material: "color: " + pick(ROCK) + "; roughness: 1; flatShading: true" });
+        }
+        add(detail, "a-plane", { rotation: "-90 0 " + (r() * 180), position: p[0] + " " + (ph + 0.03) + " " + p[1],
+          width: p[2] * 0.7, height: 0.8, material: "color: #141416; roughness: 1" });
+      });
+      // Tar-filled crack crossing the sidewalk near the start spot (shiny black, slightly raised)
+      var tx = -660, tz = 452;
+      while (tx < -545) {
+        var nx = tx + 10 + r() * 6, nz = tz + r() * 10 - 5, dx = nx - tx, dz = nz - tz;
+        add(detail, "a-box", { position: ((tx + nx) / 2) + " 0.3 " + ((tz + nz) / 2), width: Math.hypot(dx, dz) + 1.5,
+          height: 0.6, depth: 2.5, rotation: "0 " + (-Math.atan2(dz, dx) * 180 / Math.PI) + " 0",
+          material: "color: #121212; roughness: 0.3" });
+        tx = nx; tz = nz;
+      }
+
+      // Neighbor's side wall: framed windows with sills, lap siding lines, bushes at the base
+      var side = document.getElementById("neighbor-side");
+      [900, 2600].forEach(function (wz) {
+        add(side, "a-box", { position: "2792 1500 " + wz, width: 20, height: 980, depth: 780, color: "#ffffff" });
+        add(side, "a-box", { position: "2781 1500 " + wz, width: 6, height: 880, depth: 680, color: "#8fb3cc" });
+        add(side, "a-box", { position: "2776 1500 " + wz, width: 4, height: 880, depth: 24, color: "#ffffff" });
+        add(side, "a-box", { position: "2776 1500 " + wz, width: 4, height: 24, depth: 680, color: "#ffffff" });
+        add(side, "a-box", { position: "2770 1000 " + wz, width: 60, height: 40, depth: 860, color: "#e8e8e8" });
+      });
+      for (var ly = 380; ly < 2560; ly += 160) {
+        add(side, "a-box", { position: "2797 " + ly + " 1700", width: 6, height: 10, depth: 2560, color: "#9fb8cc" });
+      }
+      var BUSH = ["#3f7a2e", "#4d8a34", "#356b28"];
+      [[2640, 760], [2660, 1000], [2650, 2500], [2640, 2820]].forEach(function (b) {
+        for (var k = 0; k < 3; k++) {
+          var br = 150 + r() * 100;
+          add(side, "a-sphere", { position: (b[0] + r() * 80 - 40) + " " + (br * 0.75) + " " + (b[1] + (k - 1) * 120),
+            radius: br, "segments-width": 8, "segments-height": 6,
+            material: "color: " + pick(BUSH) + "; roughness: 1; flatShading: true" });
+        }
+      });
+
+      // ---- Place 6 (giant-feet): doormat at the foot of the porch steps (x800) ----
+      var gf = document.getElementById("place-giant-feet");
+      var GF = { x: -188, z: -205 };  // old preview camera spot (kept so the crumbs and grains there do not move)
+      // Rubber-backed coir mat, 60 x 40 cm real = 480 x 320 m, x -680..-200, z -540..-220.
+      add(gf, "a-box", { position: "-440 0.75 -380", width: 480, height: 1.5, depth: 320,
+        material: "color: #262422; roughness: 1" });
+      // Raised black rubber border (4 mm real = 3.2 m), 1.5 cm wide = 12 m
+      [["-440 1.6 -534", 480, 12], ["-440 1.6 -226", 480, 12], ["-206 1.6 -380", 12, 296], ["-674 1.6 -380", 12, 296]]
+        .forEach(function (b) {
+          add(gf, "a-box", { position: b[0], width: b[1], height: 3.2, depth: b[2], material: "color: #1e1d1b; roughness: 0.7" });
+        });
+      // Coir bristle ridges (about 2 cm tall real = 14-17 m, a normal coir mat), rows running east-west;
+      // every third row darker so the ridge ends show stripes; loose fibers stick out at the edges
+      var COIR = ["#c99a5e", "#d4a86a", "#bf8d50", "#ddb577"], COIR_DARK = ["#8a5a2e", "#7a4f28"];
+      for (var mz = -528, row2 = 0; mz < -228; mz += 10, row2++) {
+        var mh = 14 + r() * 3;
+        add(gf, "a-box", { position: "-440 " + (mh / 2) + " " + (mz + 3), width: 456, height: mh, depth: 6,
+          material: "color: " + pick(row2 % 3 === 2 ? COIR_DARK : COIR) + "; roughness: 1" });
+        for (k = 0; k < 3; k++) {  // east edge fibers, tilted outward (east)
+          add(gf, "a-cylinder", { position: (-211 + r() * 3) + " " + (mh * 0.8 + r()) + " " + (mz + r() * 6),
+            radius: 0.2, height: 2.5 + r() * 3, "segments-radial": 3,
+            rotation: "0 " + (r() * 40 - 20) + " " + (-20 - r() * 40), material: "color: " + pick(COIR) + "; roughness: 1" });
+        }
+      }
+      for (var tx2 = -664; tx2 < -212; tx2 += 6) {  // light bristle tufts on the south face (start-view side)
+        var th = 13 + r() * 5;
+        add(gf, "a-box", { position: (tx2 + r() * 3) + " " + (th / 2) + " -231.5", width: 1.2, height: th, depth: 1,
+          rotation: "0 0 " + (r() * 16 - 8), material: "color: " + pick(["#e3c287", "#ecd09a", "#6e4524"]) + "; roughness: 1" });
+      }
+      for (var fx = -664; fx < -212; fx += 6) {  // south edge fibers, tilted outward (south)
+        add(gf, "a-cylinder", { position: (fx + r() * 6) + " " + (12 + r() * 4) + " " + (-226 + r() * 3),
+          radius: 0.2, height: 2.5 + r() * 3, "segments-radial": 3,
+          rotation: (30 + r() * 40) + " " + (r() * 40 - 20) + " 0", material: "color: " + pick(COIR) + "; roughness: 1" });
+      }
+      // Loose coir fibers lying on the concrete (2-4 cm long real = 16-32 m)
+      for (i = 0; i < 10; i++) {
+        add(gf, "a-cylinder", { position: (-195 + r() * 90) + " 0.25 " + (-520 + r() * 260), radius: 0.25,
+          height: 16 + r() * 16, "segments-radial": 3, rotation: "0 " + (r() * 360) + " 90",
+          material: "color: " + pick(COIR) + "; roughness: 1" });
+      }
+      // Crumbs near the door (the food that brings the ant here): 1-3 mm real = 1-2.5 m, a few bigger bits
+      var CRUMB = ["#c98f4a", "#a8692e", "#e0b56e", "#8a5a2b"];
+      function crumb(x, z, s) {
+        add(gf, "a-box", { position: x + " " + (s * 0.3) + " " + z, width: s, height: s * 0.6, depth: s * (0.6 + r() * 0.5),
+          rotation: (r() * 30) + " " + (r() * 360) + " " + (r() * 30), material: "color: " + pick(CRUMB) + "; roughness: 0.9" });
+      }
+      for (i = 0; i < 12; i++) crumb(-680 + r() * 480, -558 + r() * 16, 1 + r() * 1.5);   // gap between mat and step
+      for (i = 0; i < 16; i++) crumb(-196 + r() * 70, -555 + r() * 240, 1 + r() * 1.5);   // along the mat's east side
+      for (i = 0; i < 8; i++) {                                                         // close to the camera
+        var ca = r() * Math.PI * 2, cd = 8 + r() * 25;
+        crumb(GF.x + Math.cos(ca) * cd, GF.z + Math.sin(ca) * cd, 1 + r() * 1.5);
+      }
+      crumb(-185, -548, 5); crumb(-170, -470, 3.5); crumb(-130, -330, 4); crumb(-150, -420, 4.5);  // cookie bits (4-6 mm)
+      // Sand grains and pebbles at the ant's feet
+      for (i = 0; i < 80; i++) {
+        var ga = r() * Math.PI * 2, gd = 2.5 + r() * 25, gsr = 0.05 + r() * 0.3;
+        add(gf, "a-sphere", { position: (GF.x + Math.cos(ga) * gd) + " " + (gsr * 0.7) + " " + (GF.z + Math.sin(ga) * gd),
+          radius: gsr, "segments-width": 6, "segments-height": 4, material: "color: " + pick(SAND) + "; roughness: 1" });
+      }
+      for (i = 0; i < 16; i++) {
+        var qx = -195 + r() * 200, qz = -340 + r() * 200, qr = 0.5 + r() * 2, qy = 0.6 + r() * 0.3;
+        if (Math.hypot(qx - GF.x, qz - GF.z) < 5) continue;
+        add(gf, "a-sphere", { position: qx + " " + (qr * qy * 0.6) + " " + qz, radius: qr, scale: "1 " + qy + " 1",
+          "segments-width": 7, "segments-height": 5, material: "color: " + pick(STONES) + "; roughness: 1; flatShading: true" });
+      }
+      // Rev 4: a person stepping into the house (1.7 m real = about 1360 m), facing the door (north). No random calls,
+      // so all other detail stays the same. Right shoe stands on the first porch step (top y 144). Left shoe is lifted
+      // over the doormat mid-step, its treaded sole hanging overhead like a ceiling (toe ~24 m up over the 17 m bristles,
+      // heel ~48 m up, sticking 70 m past the mat's south edge, so the ant can walk under the heel). Sneakers like the old
+      // loose one, 28 cm real (scaled to 0.8 long). Everything is merged into ONE mesh with vertex colors (like the hedge).
+      var person = [], V3 = THREE.Vector3, DG = Math.PI / 180, BLUE = "#3d6db3", JEANS = "#2f4a7a", SKIN = "#c68863";
+      function part(g, color) { person.push([g, new THREE.Color(color)]); }
+      function limb(a, b, rad, color) {  // cylinder from point a to point b
+        var d = new V3().subVectors(b, a), len = d.length();
+        part(new THREE.CylinderGeometry(rad, rad, len, 14).applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new V3(0, 1, 0), d.normalize()))
+          .translate((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2), color);
+      }
+      function ball(p, rad, color) { part(new THREE.SphereGeometry(rad, 14, 10).translate(p.x, p.y, p.z), color); }
+      function shoeAt(x, y, z, pitch) {  // shoe-local: sole bottom y 0, toe toward -z; returns the ankle point
+        var M = new THREE.Matrix4().makeTranslation(x, y, z).multiply(new THREE.Matrix4().makeRotationX(pitch * DG))
+          .multiply(new THREE.Matrix4().makeScale(1, 1, 0.8));
+        function s(g, px, py, pz, color) { part(g.translate(px, py, pz).applyMatrix4(M), color); }
+        s(new THREE.BoxGeometry(86, 4, 210), 0, 2, 0, "#8d8c88");                       // grey outsole
+        s(new THREE.BoxGeometry(84, 12, 210), 0, 10, 0, "#ecebe6");                     // white midsole
+        [-105, 105].forEach(function (ez) {
+          s(new THREE.CylinderGeometry(43, 43, 4, 20), 0, 2, ez, "#8d8c88");
+          s(new THREE.CylinderGeometry(42, 42, 12, 20), 0, 10, ez, "#ecebe6");
+        });
+        for (var tz = -117; tz <= 117; tz += 18) s(new THREE.BoxGeometry(70, 1.6, 6), 0, -0.6, tz, "#2b2b2b");  // tread lines
+        s(new THREE.BoxGeometry(76, 46, 150), 0, 39, 15, BLUE);                          // upper
+        s(new THREE.SphereGeometry(38, 14, 10).scale(1, 0.6, 1.4), 0, 30, -70, BLUE);   // toe box (bottom hidden in the midsole)
+        s(new THREE.BoxGeometry(78, 70, 50), 0, 51, 80, BLUE);                          // heel collar
+        s(new THREE.BoxGeometry(50, 8, 70).rotateX(-20 * DG), 0, 66, 0, "#5b86c7");     // tongue
+        s(new THREE.BoxGeometry(80, 10, 120), 0, 33, 15, "#ffffff");                    // side stripe
+        s(new THREE.BoxGeometry(30, 22, 6), 0, 94, 103, BLUE);                          // heel tab
+        [-30, -14, 2, 18].forEach(function (lz) {                                       // laces
+          s(new THREE.BoxGeometry(56, 2.5, 4).rotateX(-20 * DG), 0, 70.5 + lz * 0.36, lz, "#ffffff");
+        });
+        return new V3(0, 78, 48).applyMatrix4(M);
+      }
+      function leg(hip, ankle) {  // thigh and shin 320 m each (40 cm real); the knee bends forward (-z)
+        var L = 320, d = hip.distanceTo(ankle), dir = new V3().subVectors(ankle, hip).normalize();
+        var side = new V3(0, -dir.z, dir.y); if (side.z > 0) side.negate();
+        var knee = hip.clone().lerp(ankle, 0.5).add(side.normalize().multiplyScalar(Math.sqrt(Math.max(0, L * L - d * d / 4))));
+        var cuff = ankle.clone().lerp(knee, 0.12);
+        limb(ankle, cuff, 34, "#f0f0f0");                  // sock
+        limb(cuff, knee, 48, JEANS); ball(knee, 50, JEANS);
+        limb(knee, hip, 58, JEANS); ball(hip, 62, JEANS);
+        limb(cuff, cuff.clone().lerp(knee, 0.08), 52, "#26406b");  // jeans hem
+      }
+      var standAnkle = shoeAt(-400, 145.4, -680, 0);   // right shoe on step 1 (treads sit on the step top)
+      var liftAnkle = shoeAt(-560, 37.4, -270, -6);    // left shoe over the mat, toe tipped down a little
+      var HIP = { y: 640, z: -560 };                   // hip joints 640 m up (straight legs: about 90 cm real)
+      leg(new V3(-400, HIP.y, HIP.z), standAnkle);     // front leg bent (stepping up)
+      leg(new V3(-560, HIP.y, HIP.z), liftAnkle);      // back leg almost straight, foot just off the mat
+      part(new THREE.BoxGeometry(290, 160, 190).translate(-480, 690, HIP.z), JEANS);           // hips
+      part(new THREE.BoxGeometry(294, 18, 194).translate(-480, 765, HIP.z), "#4a3020");        // belt
+      part(new THREE.CylinderGeometry(150, 135, 410, 16).scale(1, 1, 0.62).translate(-480, 970, HIP.z), "#7b4fa0");  // shirt
+      [[-1, -610, -650], [1, -520, -490]].forEach(function (a) {  // arms swing opposite to the legs
+        var sh = new V3(-480 + a[0] * 160, 1130, HIP.z), el = new V3(-480 + a[0] * 178, 910, a[1]), wr = new V3(-480 + a[0] * 184, 710, a[2]);
+        ball(new V3(-480 + a[0] * 150, 1140, HIP.z), 62, "#7b4fa0");
+        limb(sh, el, 42, "#7b4fa0"); ball(el, 38, SKIN);
+        limb(el, wr, 34, SKIN); ball(new V3(wr.x, wr.y - 30, wr.z), 44, SKIN);
+      });
+      limb(new V3(-480, 1170, HIP.z), new V3(-480, 1230, HIP.z - 6), 48, SKIN);                // neck
+      ball(new V3(-480, 1290, HIP.z - 10), 95, SKIN);                                          // head
+      part(new THREE.SphereGeometry(100, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.55).translate(-480, 1298, HIP.z - 2), "#3b2a20");  // hair
+      gf.object3D.add(new THREE.Mesh(merged(person), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 })));
+      // Soft shadow under the lifted shoe: on top of the bristles, and on the concrete under the heel (2 planes)
+      var shCan = document.createElement("canvas"); shCan.width = shCan.height = 64;
+      var shc = shCan.getContext("2d"), shg = shc.createRadialGradient(32, 32, 0, 32, 32, 32);
+      shg.addColorStop(0, "rgba(0, 0, 0, 0.6)"); shg.addColorStop(0.6, "rgba(0, 0, 0, 0.35)"); shg.addColorStop(1, "rgba(0, 0, 0, 0)");
+      shc.fillStyle = shg; shc.fillRect(0, 0, 64, 64);
+      var shMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shCan), transparent: true, depthWrite: false });
+      [[-560, 18.4, -315, 150, 180], [-560, 0.2, -190, 120, 110]].forEach(function (s) {
+        var m = new THREE.Mesh(new THREE.PlaneGeometry(s[3], s[4]).rotateX(-Math.PI / 2), shMat);
+        m.position.set(s[0], s[1], s[2]);
+        gf.object3D.add(m);
+      });
+
+      // ---- Place 8 (fence-web, walk place 3): fence, garden bed, spider web (x800) ----
+      // Built after all older random calls, so places 1 and 2 keep their exact detail.
+      var fw = document.getElementById("place-fence-web");
+      var FW = { x: 220, z: -640 };  // old preview camera spot (kept so the detail there does not move)
+      var UP = new THREE.Vector3(0, 1, 0), D = 180 / Math.PI;
+      function eul(q) { var e = new THREE.Euler().setFromQuaternion(q, "YXZ"); return e.x * D + " " + e.y * D + " " + e.z * D; }
+      function stick(parent, a, b, rad, mat) {  // cylinder from point a to point b (A-Frame rotation order is YXZ)
+        var d = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]), len = d.length();
+        return add(parent, "a-cylinder", { position: (a[0] + b[0]) / 2 + " " + (a[1] + b[1]) / 2 + " " + (a[2] + b[2]) / 2,
+          radius: rad, height: len, "segments-radial": 5,
+          rotation: eul(new THREE.Quaternion().setFromUnitVectors(UP, d.normalize())), material: mat });
+      }
+      // Trampled bare soil by the fence (camera stands here)
+      add(fw, "a-circle", { rotation: "-90 0 0", position: "300 -0.3 -640", radius: 250, scale: "1 1.3 1", segments: 20,
+        material: "color: #6b4e36; roughness: 1" });
+      // Weathered wooden fence along x 400, house wall (z -1280) to the end post. 1.2 m real = 960 m.
+      // Posts 10 cm = 80 m; rails 4 x 9 cm = 32 x 72 m against the boards; boards 12 x 2 cm = 96 x 16 m on the garden side.
+      var GRAIN = "color: #54463a; roughness: 1";
+      [-900, -535].forEach(function (pz) {
+        add(fw, "a-box", { position: "400 520 " + pz, width: 80, height: 1040, depth: 80, material: "color: #7b6a58; roughness: 1" });
+        add(fw, "a-box", { position: "400 1046 " + pz, width: 96, height: 12, depth: 96, material: "color: #66574a; roughness: 1" });
+        [-22, 15].forEach(function (gz) {
+          add(fw, "a-box", { position: "359.4 " + (480 + r() * 60) + " " + (pz + gz), width: 1, height: 760 + r() * 200, depth: 2, material: GRAIN });
+        });
+      });
+      [200, 560, 900].forEach(function (ry) {  // bottom rail 164..236 m (20-30 cm real)
+        add(fw, "a-box", { position: "424 " + ry + " -927.5", width: 32, height: 72, depth: 705, material: "color: #85735f; roughness: 1" });
+        add(fw, "a-box", { position: "407.4 " + (ry + 10) + " -927.5", width: 1, height: 2, depth: 700, material: GRAIN });
+      });
+      var WOOD = ["#8a7862", "#7c6b58", "#93816b"];
+      // Boards reach the ground and overlap (no gap an ant could use), except boards 5 and 6 by the end post:
+      // their bottoms rotted off (88-95 m = 11-12 cm), leaving the ONE opening (z -718..-575) where the web hangs.
+      for (var bi = 0; bi < 7; bi++) {
+        var bz = -1223.93 + bi * 112.14, bh = 960 + r() * 30, yb = bi === 5 ? 95 : bi === 6 ? 88 : -1, btop = 24 + bh;
+        add(fw, "a-box", { position: (448 + (bi % 2) * 0.6) + " " + ((yb + btop) / 2) + " " + bz, width: 16, height: btop - yb, depth: 114,
+          material: "color: " + pick(WOOD) + "; roughness: 1" });
+        for (k = 0; k < 2; k++) {  // same random order as before (y, z, height); strips stop above a rotted end
+          var gy = 480 + r() * 80, gz2 = bz - 30 + r() * 60, gtop = gy + (600 + r() * 300) / 2, gbot = Math.max(2 * gy - gtop, yb + 4);
+          add(fw, "a-box", { position: "439.4 " + ((gbot + gtop) / 2) + " " + gz2, width: 1, height: gtop - gbot, depth: 2, material: GRAIN });
+        }
+      }
+      [[5, 95], [6, 88]].forEach(function (b) {  // dark rotten band on the broken ends
+        add(fw, "a-box", { position: (448 + (b[0] % 2) * 0.6) + " " + (b[1] + 3) + " " + (-1223.93 + b[0] * 112.14), width: 17.5, height: 6, depth: 115,
+          material: "color: #4a3b2e; roughness: 1" });
+      });
+      [[-700, 95, 26], [-652, 95, 16], [-596, 88, 22]].forEach(function (s) {  // splinters hanging from the broken ends
+        add(fw, "a-cone", { position: "447 " + (s[1] - s[2] / 2) + " " + s[0], "radius-top": 7, "radius-bottom": 0.4, height: s[2],
+          "segments-radial": 4, scale: "0.9 1 1.4", material: "color: #5e4c3a; roughness: 1" });
+      });
+      // Orb web low in the corner under the bottom rail, beside the end post (web plane x 424, hub 85 m = ~1 cm up).
+      // Web-local x = north, y = up. Post face is at x -85, rail underside at y 79, ground at y -85.
+      // Real silk is far thinner than a pixel; threads are drawn about 1 m thick so they can be seen.
+      var web = add(fw, "a-entity", { position: "424 85 -660", rotation: "0 90 0" });
+      var SILK = "color: #ffffff; emissive: #b4c2d0; emissiveIntensity: 0.6; roughness: 0.2; metalness: 0.2; opacity: 0.85; transparent: true";
+      for (k = 0; k < 12; k++) {  // radial spokes, out to the post, rail and ground (open north side ends at 72)
+        var wa = k * 30 / D, wc = Math.cos(wa), ws = Math.sin(wa), L = wc > 0.01 ? 72 : 1e9;
+        if (wc < -0.01) L = Math.min(L, 85 / -wc);
+        if (ws > 0.01) L = Math.min(L, 79 / ws);
+        if (ws < -0.01) L = Math.min(L, 85 / -ws);
+        stick(web, [0, 0, 0], [wc * L, ws * L, 0], 0.45, SILK);
+      }
+      [5, 12, 21, 30, 39, 48, 57, 66].forEach(function (ri) {  // spiral rings (12-sided, corners on the spokes)
+        add(web, "a-torus", { radius: ri, "radius-tubular": 0.35, "segments-radial": 3, "segments-tubular": 12, material: SILK });
+      });
+      stick(web, [62.4, 36, 0], [110, 79, 0], 0.45, SILK);    // anchor threads on the open north side
+      stick(web, [62.4, -36, 0], [110, -85, 0], 0.45, SILK);
+      [[15, 26], [24, -41.6], [-18.2, -10.5], [0, 70]].forEach(function (p) {  // dew drops (2 mm real)
+        add(web, "a-sphere", { position: p[0] + " " + p[1] + " -0.6", radius: 1.6, "segments-width": 10, "segments-height": 8,
+          material: "color: #e6f6ff; emissive: #6f8aa0; emissiveIntensity: 0.4; roughness: 0.05; metalness: 0.1; opacity: 0.65; transparent: true" });
+      });
+      // Friendly garden spider at the web's edge by the post corner, back toward the ant, head toward the hub.
+      // Body about 3.5 cm real = 30 m (built at 20 m, scale 1.5). Local coords: back = +y, head = -z.
+      // No fangs, muted browns, big round eyes.
+      var SP = [418, 135, -598], F = new THREE.Vector3(0, -50, -62).normalize();
+      var sY = new THREE.Vector3(-1, 0, 0), sZ = F.clone().negate(), sX = new THREE.Vector3().crossVectors(sY, sZ);
+      var spider = add(fw, "a-entity", { position: SP.join(" "), scale: "1.5 1.5 1.5",
+        rotation: eul(new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(sX, sY, sZ))) });
+      [["0 1.5 7", 7.5, "0.9 0.75 1.1", "#b8854f"], ["0 6.6 7", 3.5, "1 0.3 1.5", "#ead7b0"], ["0 0.5 -3.5", 4.5, "1 0.8 1.1", "#8a6446"],
+       ["-1.9 3.6 -6", 2.1, "1 1 1", "#ffffff"], ["1.9 3.6 -6", 2.1, "1 1 1", "#ffffff"],
+       ["-1.9 5.1 -6.6", 1.1, "1 1 1", "#1d1a17"], ["1.9 5.1 -6.6", 1.1, "1 1 1", "#1d1a17"]].forEach(function (s) {
+        add(spider, "a-sphere", { position: s[0], radius: s[1], scale: s[2], "segments-width": 12, "segments-height": 8,
+          material: "color: " + s[3] + "; roughness: 0.8" });
+      });
+      [35, 70, 110, 145].forEach(function (phi) {  // 4 legs per side, knee up, tip on the silk
+        [-1, 1].forEach(function (sd) {
+          var dx = sd * Math.sin(phi / D), dz = -Math.cos(phi / D), base = [sd * 2.5, 0, -3.5 + (phi - 90) / 30];
+          var knee = [base[0] + dx * 9, 5, base[2] + dz * 9], tip = [base[0] + dx * 19, -4, base[2] + dz * 19];
+          stick(spider, base, knee, 0.9, "color: #6e543c; roughness: 0.8");
+          stick(spider, knee, tip, 0.7, "color: #6e543c; roughness: 0.8");
+        });
+      });
+      stick(fw, [424, SP[1] + F.y * 12, SP[2] + F.z * 12], [424, 85, -660], 0.35, SILK);  // signal line to the hub
+      // Garden bed east of the end post: dark soil, low wooden edging (5 cm = 40 m), plants 25-35 cm real
+      // West edging at x 506 leaves a 38 m strip of soil between the boards (x 456) and the bed.
+      add(fw, "a-box", { position: "832 5 -540", width: 628, height: 10, depth: 472, material: "color: #3b2a1e; roughness: 1" });
+      [["832 20 -292", 676, 24], ["832 20 -788", 676, 24], ["506 20 -540", 24, 472], ["1158 20 -540", 24, 472]].forEach(function (e) {
+        add(fw, "a-box", { position: e[0], width: e[1], height: 40, depth: e[2], material: "color: #8b6f4e; roughness: 1" });
+      });
+      for (i = 0; i < 5; i++) {  // soil clods
+        var cr = 5 + r() * 5;
+        add(fw, "a-sphere", { position: (520 + r() * 300) + " 10 " + (-480 + r() * 160), radius: cr, scale: "1 0.5 1",
+          "segments-width": 7, "segments-height": 5, material: "color: #2e2118; roughness: 1; flatShading: true" });
+      }
+      var LEAF = "color: #4f8a32; roughness: 1";
+      function flower(x, z, h, petal) {  // stem leaning toward the fence, two leaves, a flower facing west
+        var t = [x - 10, 8 + h, z + 6];
+        stick(fw, [x, 8, z], t, 3, "color: #5a8f34; roughness: 1");
+        [[0.35, 1], [0.6, -1]].forEach(function (l) {
+          add(fw, "a-sphere", { position: (x - 10 * l[0]) + " " + (8 + h * l[0]) + " " + (z + 6 * l[0] + l[1] * 26), radius: 28,
+            scale: "0.35 0.08 1", rotation: (-l[1] * 25) + " 0 0", "segments-width": 10, "segments-height": 6, material: LEAF });
+        });
+        add(fw, "a-cylinder", { position: t.join(" "), radius: 30, height: 2.5, rotation: "0 0 55", "segments-radial": 14,
+          material: "color: " + petal + "; roughness: 0.9" });
+        add(fw, "a-sphere", { position: (t[0] - 1.6) + " " + (t[1] + 1.2) + " " + t[2], radius: 10, scale: "1 0.5 1", rotation: "0 0 55",
+          material: "color: #f2c230; roughness: 0.9" });
+      }
+      flower(560, -360, 260, "#e8608a");
+      flower(700, -440, 200, "#f08a3a");
+      for (k = 0; k < 6; k++) {  // leafy plant (hosta-like)
+        var pa = k * 60 + r() * 20;
+        add(fw, "a-sphere", { position: (640 + Math.cos(pa / D) * 30) + " 50 " + (-340 + Math.sin(pa / D) * 30), radius: 34,
+          scale: "1 0.1 0.45", rotation: "0 " + (-pa) + " 30", "segments-width": 10, "segments-height": 6,
+          material: "color: " + pick(["#3f7a2e", "#4f9a3a", "#5aa040"]) + "; roughness: 1" });
+      }
+      // Fallen leaf (6 cm real = 48 m) leaning against the end post
+      add(fw, "a-sphere", { position: "345 20 -520", radius: 24, scale: "1 0.04 0.55", rotation: "0 0 60",
+        "segments-width": 12, "segments-height": 6, material: "color: #c48a3c; roughness: 1" });
+      add(fw, "a-box", { position: "344.2 20.5 -520", width: 46, height: 0.8, depth: 1.2, rotation: "0 0 60", material: "color: #8a5a28; roughness: 1" });
+      // Garden hose (1.6 cm thick real = 12.8 m) from the bed across the lawn, south of the porch landing
+      var HOSE = "color: #2f8a3e; roughness: 0.5";
+      var hp = [[500, -260], [330, -150], [100, 10], [-150, 70], [-375, 170]];
+      for (i = 0; i < hp.length - 1; i++) {
+        stick(fw, [hp[i][0], 6, hp[i][1]], [hp[i + 1][0], 6, hp[i + 1][1]], 6.4, HOSE);
+        if (i > 0) add(fw, "a-sphere", { position: hp[i][0] + " 6 " + hp[i][1], radius: 6.4, "segments-width": 10, "segments-height": 6, material: HOSE });
+      }
+      stick(fw, [500, 6, -260], [517, 6, -271], 7.5, "color: #c9a03a; metalness: 0.6; roughness: 0.4");  // brass nozzle
+      // Two dandelions in the lawn south of the landing (fills the doormat's south view)
+      function dandelion(x, z, h, puff) {
+        for (k = 0; k < 5; k++) {  // leaf rosette (15-20 cm real)
+          var la = k * 72 + r() * 30;
+          add(fw, "a-box", { position: (x + Math.cos(la / D) * 70) + " 3 " + (z + Math.sin(la / D) * 70), width: 140, height: 1.5, depth: 24,
+            rotation: "0 " + (-la) + " 6", material: "color: #4c8a2e; roughness: 1" });
+        }
+        var top = [x + 8, h, z - 5];
+        stick(fw, [x, 0, z], top, 2.2, "color: #6f9a3a; roughness: 1");
+        if (puff) add(fw, "a-sphere", { position: top[0] + " " + (h + 16) + " " + top[2], radius: 22,
+          material: "color: #ffffff; opacity: 0.6; transparent: true; roughness: 1" });
+        else add(fw, "a-sphere", { position: top.join(" "), radius: 16, scale: "1 0.6 1", material: "color: #f5c518; roughness: 0.9" });
+      }
+      dandelion(-230, 40, 115, false);  // 14-18 cm real; short enough to stay hidden behind the
+      dandelion(-60, 150, 140, true);   // walkway grass in the place 1 first view
+      // Ground detail at the ant's feet: soil crumbs, pebbles, a sunflower seed (1 cm real = 8 m)
+      var SOIL = ["#5a4030", "#4a3424", "#7a5a40"];
+      for (i = 0; i < 12; i++) {
+        var sa = (r() * 140 - 70) / D, sdist = 8 + r() * 40, sr3 = 0.4 + r() * 1;
+        add(fw, "a-sphere", { position: (FW.x + Math.cos(sa) * sdist) + " " + (sr3 * 0.3 - 0.3) + " " + (FW.z + Math.sin(sa) * sdist),
+          radius: sr3, scale: "1 0.6 1", "segments-width": 6, "segments-height": 4, material: "color: " + pick(SOIL) + "; roughness: 1; flatShading: true" });
+      }
+      for (i = 0; i < 8; i++) {
+        var pa2 = r() * Math.PI * 2, pd = 10 + r() * 45, pr3 = 0.5 + r() * 1.3;
+        add(fw, "a-sphere", { position: (FW.x + Math.cos(pa2) * pd) + " " + (pr3 * 0.4 - 0.3) + " " + (FW.z + Math.sin(pa2) * pd),
+          radius: pr3, scale: "1 0.7 1", "segments-width": 7, "segments-height": 5, material: "color: " + pick(STONES) + "; roughness: 1; flatShading: true" });
+      }
+      var seedEl = add(fw, "a-entity", { position: "250 1.3 -650", rotation: "0 35 0" });
+      add(seedEl, "a-sphere", { radius: 4, scale: "1 0.4 0.55", material: "color: #34312e; roughness: 0.7" });
+      [-1.1, 1.1].forEach(function (oz) {
+        add(seedEl, "a-sphere", { position: "0 0 " + oz, radius: 3.9, scale: "0.8 0.4 0.1", material: "color: #d8d2c2; roughness: 0.7" });
+      });
+
+      // ---- Revision: a reason to pass the web (built last, so all older detail stays the same) ----
+      // A big ripe strawberry (5 cm real = 40 m) fell from the bed and lies just past the web, in the opening.
+      // Built at 1/1.6 size, scale 1.6. Local +y = cap, -y = tip; lying down, cap toward the north.
+      var RED = "color: #d81e2c; roughness: 0.35; metalness: 0.05", CAP = "color: #3e8f2c; roughness: 0.9";
+      var berry = add(fw, "a-entity", { position: "474 15.5 -655", rotation: "-80 15 0", scale: "1.6 1.6 1.6" });
+      add(berry, "a-sphere", { position: "0 2 0", radius: 10, scale: "1 0.9 1", "segments-width": 18, "segments-height": 12, material: RED });
+      add(berry, "a-cone", { position: "0 -6 0", "radius-top": 9.4, "radius-bottom": 1.2, height: 16, "segments-radial": 18, material: RED });
+      [[6, 9.2, 0], [1, 10.1, 20], [-5, 6.5, 0]].forEach(function (row) {  // seeds on the side the ant sees
+        [120, 160, 200, 240].forEach(function (ph) {
+          var sa2 = (ph + row[2]) / D;
+          add(berry, "a-sphere", { position: (Math.cos(sa2) * row[1]) + " " + row[0] + " " + (Math.sin(sa2) * row[1]), radius: 0.7,
+            "segments-width": 6, "segments-height": 4, material: "color: #f4d35e; roughness: 0.6" });
+        });
+      });
+      for (k = 0; k < 6; k++) {  // leafy green cap
+        var ca2 = k * 60 + 15;
+        add(berry, "a-sphere", { position: (Math.cos(ca2 / D) * 5) + " 10.4 " + (Math.sin(ca2 / D) * 5), radius: 7, scale: "0.4 0.1 1",
+          rotation: "30 " + (90 - ca2) + " 0", "segments-width": 8, "segments-height": 4, material: CAP });
+      }
+      add(berry, "a-cylinder", { position: "0 13 0", radius: 1, height: 5, "segments-radial": 6, material: CAP });
+      add(fw, "a-circle", { rotation: "-90 0 0", position: "456 -0.2 -650", radius: 28, scale: "1 0.6 1", segments: 16,  // juice puddle
+        material: "color: #a3182a; roughness: 0.1; metalness: 0.1; opacity: 0.8; transparent: true" });
+      // Trail of tiny strawberry bits from the ant's feet, through the web gap, to the berry
+      for (i = 0; i < 17; i++) {
+        var tx3 = 228 + i * 14, ts = 0.7 + (tx3 - 220) * 0.006;
+        add(fw, "a-sphere", { position: tx3 + " " + (ts * 0.15 - 0.3) + " " + (-641 - i * 0.8 + r() * 4 - 2), radius: ts, scale: "1 0.35 1",
+          "segments-width": 6, "segments-height": 4, material: "color: " + pick(["#c8283a", "#e04a5c", "#a81e30"]) + "; roughness: 0.3" });
+      }
+      // The strawberry plant it fell from, in the bed corner (leaves 10-14 cm up); seen through the gap
+      var SB = [570, 10, -660], SLEAF = ["#3d7f2a", "#4a8f32", "#356f25"];
+      [[505, 85, -705], [515, 100, -612], [560, 112, -672]].forEach(function (t) {
+        stick(fw, SB, t, 2, "color: #5a8a34; roughness: 1");
+        var h0 = Math.atan2(t[0] - SB[0], t[2] - SB[2]);
+        [-70, 0, 70].forEach(function (o) {  // three leaflets; their undersides tilt toward the ant
+          var la = h0 + o / D, lx = Math.sin(la), lz = Math.cos(la);
+          add(fw, "a-sphere", { position: (t[0] + lx * 16) + " " + (t[1] + 2) + " " + (t[2] + lz * 16), radius: 18, scale: "0.6 0.1 1",
+            rotation: (25 * lx) + " " + (la * D) + " 0", "segments-width": 10, "segments-height": 6, material: "color: " + pick(SLEAF) + "; roughness: 1" });
+        });
+      });
+      stick(fw, SB, [532, 68, -640], 1.5, "color: #5a8a34; roughness: 1");  // a second berry still on the plant
+      add(fw, "a-sphere", { position: "532 58 -640", radius: 6, scale: "1 1.3 1", "segments-width": 12, "segments-height": 8, material: RED });
+      add(fw, "a-sphere", { position: "532 66 -640", radius: 5, scale: "1 0.25 1", "segments-width": 8, "segments-height": 4, material: CAP });
+      // Going around the end post is blocked: bed edging pressed against the fence end, and a flower pot
+      // (19 cm real = 150 m) against the post. The web gap is the only way to the berry.
+      add(fw, "a-box", { position: "479 20 -497", width: 54, height: 40, depth: 24, material: "color: #8b6f4e; roughness: 1" });
+      add(fw, "a-cone", { position: "445 75 -438", "radius-bottom": 62, "radius-top": 80, height: 150, "segments-radial": 20,
+        material: "color: #c4683f; roughness: 1" });
+      add(fw, "a-cylinder", { position: "445 150 -438", radius: 86, height: 22, "segments-radial": 20, material: "color: #b35a34; roughness: 1" });
+      for (k = 0; k < 4; k++) {  // leaves of the potted plant, leaning out
+        var pa3 = k * 90 + 20;
+        add(fw, "a-sphere", { position: (445 + Math.cos(pa3 / D) * 50) + " 215 " + (-438 + Math.sin(pa3 / D) * 50), radius: 60,
+          scale: "0.06 1 0.3", rotation: "0 " + (180 - pa3) + " 20", "segments-width": 10, "segments-height": 6, material: LEAF });
+      }
+      // Clover on the bare soil (south view): leaflets 1.5 cm = 12 m, stems 5-7 cm = 40-56 m, one white flower
+      [[200, -555, 48], [252, -535, 40], [170, -505, 56]].forEach(function (c, ci) {
+        var ct = [c[0] + 4, c[2], c[1] - 3];
+        stick(fw, [c[0], 0, c[1]], ct, 1, "color: #5f9a3a; roughness: 1");
+        for (k = 0; k < 3; k++) {
+          var cl = k * 120 + ci * 40;
+          add(fw, "a-sphere", { position: (ct[0] + Math.sin(cl / D) * 6) + " " + ct[1] + " " + (ct[2] + Math.cos(cl / D) * 6), radius: 6.5,
+            scale: "0.9 0.12 1", rotation: "-20 " + cl + " 0", "segments-width": 10, "segments-height": 5, material: "color: #4f9a3a; roughness: 1" });
+        }
+      });
+      stick(fw, [168, 0, -500], [162, 70, -508], 1, "color: #5f9a3a; roughness: 1");
+      add(fw, "a-sphere", { position: "162 76 -508", radius: 7, "segments-width": 10, "segments-height": 8, material: "color: #f3eef2; roughness: 1" });
+
+      // ---- Revision 2: low hedge on the east edge and the lawn's south edge (built last, so older detail stays the same) ----
+      // Boxwood-like hedge about 35-45 cm real (280-360 m tall). Built in a local frame (x = depth behind the face,
+      // z = along the hedge), then placed. Nothing reaches in front of the face (the YARD "hedge" solids),
+      // so the ant stops right at the leaves. All shapes are merged into ONE mesh with vertex colors (1 draw call).
+      var hedgeParts = [], HEDGE = ["#2e5a22", "#386a28", "#2a5220", "#33612a"], HLEAF = ["#3f7a2e", "#2f5e24", "#4a8a34", "#356b28"];
+      function hedgeRow(L, place) {
+        var fronts = [];
+        function blob(g, x, y, z, color) { place(g.translate(x, y, z)); hedgeParts.push([g, new THREE.Color(color)]); }
+        blob(new THREE.BoxGeometry(160, 230, L), 140, 115, L / 2, "#264a1d");          // dark core fills the gaps
+        for (var u = 0; u < L;) {                                                      // front row, sunk into the lawn
+          var hr = 90 + r() * 40, hx = 9 + hr + r() * 8;  // 9 m left in front for the leaves
+          blob(new THREE.SphereGeometry(hr, 8, 6).scale(1, 0.85, 1.2), hx, hr * 0.3, u, pick(HEDGE));
+          fronts.push([hx, hr * 0.3, u, hr]);
+          u += hr * 1.2;
+        }
+        for (u = 40; u < L - 10;) {                                                     // rounded top row
+          var tr = 120 + r() * 40;
+          blob(new THREE.SphereGeometry(tr, 8, 6).scale(1, 0.8, 1.1), 2 + tr + r() * 30, 170 + r() * 40, u, pick(HEDGE));
+          u += tr * 1.1;
+        }
+        fronts.forEach(function (f, fi) {
+          for (k = 0; k < 100; k++) {  // diamond leaves (2 cm real) on the low side the ant faces
+            var la = (r() * 140 - 70) / D, le = (r() * 65 - 25) / D;
+            var lx = Math.max(f[0] - Math.cos(le) * Math.cos(la) * f[3], 9);
+            blob(new THREE.SphereGeometry(9, 4, 2).scale(1, 0.3, 0.6).rotateX(r() * 3).rotateY(r() * 3).rotateZ(r() * 3),
+              lx, f[1] + Math.sin(le) * f[3] * 0.85, f[2] + Math.cos(le) * Math.sin(la) * f[3] * 1.2, pick(HLEAF));
+          }
+          if (fi % 2) return;  // a few small white/pink flowers (2-3 cm real)
+          var az = (r() < 0.5 ? -1 : 1) * (25 + r() * 30) / D, el = (20 + r() * 35) / D;
+          var dx = -Math.cos(el) * Math.cos(az), dy = Math.sin(el), dz = Math.cos(el) * Math.sin(az);
+          var fx = f[0] + dx * f[3], fy = f[1] + dy * f[3] * 0.85, fz = f[2] + dz * f[3] * 1.2;
+          blob(new THREE.SphereGeometry(11, 6, 4).scale(1, 0.6, 1), fx, fy, fz, pick(["#ffffff", "#f6d2e0", "#fff4c8"]));
+          blob(new THREE.SphereGeometry(4, 6, 4), fx + dx * 6, fy + dy * 6, fz + dz * 6, "#f2c230");
+        });
+      }
+      hedgeRow(2610, function (g) { g.translate(1170, 0, -1290); });                     // east: face x 1170, z -1290..1320
+      hedgeRow(1560, function (g) { g.rotateY(-Math.PI / 2).translate(1300, 0, 1200); }); // south: face z 1200, x 1300..-260
+      function merged(parts) {  // [geometry, color] pairs -> one geometry with vertex colors (one draw call)
+        var pos = [], col = [], idx = [], n = 0;
+        parts.forEach(function (p) {
+          var a = p[0].attributes.position, ix = p[0].index;
+          for (var q = 0; q < a.count; q++) { pos.push(a.getX(q), a.getY(q), a.getZ(q)); col.push(p[1].r, p[1].g, p[1].b); }
+          if (ix) for (q = 0; q < ix.count; q++) idx.push(ix.getX(q) + n);
+          else for (q = 0; q < a.count; q++) idx.push(q + n);  // non-indexed (extrude, dodecahedron)
+          n += a.count;
+          p[0].dispose();
+        });
+        var geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+        geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+        geo.setIndex(idx);
+        geo.computeVertexNormals();
+        return geo;
+      }
+      document.getElementById("yard-hedge").object3D.add(new THREE.Mesh(merged(hedgeParts),
+        new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true })));
+
+      // ---- Revision 3: west and south edges (built last, so all older detail stays the same) ----
+      // West edge (x -1300): a low brick border (6 cm real = 46 m) along the driveway, from the garage door to the
+      // front fence. The family car is parked right behind it on a gravel strip; its east tires stand just behind
+      // the bricks. South edge on the walkway and driveway (z 1198): a white picket fence (70 cm real) with a closed
+      // driveway gate and a closed garden gate, from behind the car to the hedge's west end. A solid bottom board
+      // closes the fence, so there is no gap an ant could use. No part reaches past the YARD faces at ant height.
+      // Everything is merged into two meshes (matte, shiny) like the hedge.
+      var edges = [], WHITE = "#f2f0ea";
+      function piece(g, x, y, z, color, shiny) {  // group: 0 matte, 1 shiny, 2 white fence paint (faces north, into shade)
+        edges.push([g.translate(x, y, z), new THREE.Color(color), color === WHITE ? 2 : shiny ? 1 : 0]);
+      }
+      function box(x0, x1, y0, y1, z0, z1, color, shiny) {
+        piece(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, color, shiny);
+      }
+      function prism(A, B, C, x0, x1) {  // wedge: triangle A, B, C given as (z, y), stretched from x0 to x1
+        var a = [(B[0] - C[0]) / 1.732, (B[1] - C[1]) / 1.732];
+        var b = [(A[0] - (B[0] + C[0]) / 2) / 1.5, (A[1] - (B[1] + C[1]) / 2) / 1.5];
+        return new THREE.CylinderGeometry(1, 1, 1, 3).applyMatrix4(new THREE.Matrix4().set(
+          0, x1 - x0, 0, (x0 + x1) / 2,   a[1], 0, b[1], A[1] - b[1],   a[0], 0, b[0], A[0] - b[0],   0, 0, 0, 1));
+      }
+      // Gravel strip under the car, and the brick border with mortar joints (bricks 20 cm = 160 m long)
+      piece(new THREE.PlaneGeometry(1552, 2480).rotateX(-Math.PI / 2), -2124, -0.6, -40, "#9d968a");
+      box(-1344, -1304, -1, 40, -1265, 1198, "#b9b2a5");
+      for (var bz3 = -1265; bz3 < 1198; bz3 += 160) {
+        box(-1348, -1300, -1, 46, bz3 + 2, Math.min(bz3 + 158, 1198), pick(["#9c4a32", "#a8553a", "#8e4230", "#b0603f"]));
+      }
+      // Family car (small hatchback, 2.9 x 1.6 x 1.45 m real, red). Car-local: x = east (+-640), z = south (nose at
+      // -1160), y = up; ground clearance 15 cm = 120 m. Axles at z -600 and 760, wheel openings +-250 around them.
+      var CX = -1988, CZ = -10, PAINT = "#c0392b", GLASS = "#25313b", BLACK = "#151517", TRIM = "#2c2c2f";
+      function cb(x0, x1, y0, y1, z0, z1, color, shiny) { box(CX + x0, CX + x1, y0, y1, CZ + z0, CZ + z1, color, shiny); }
+      function cbs(sd, x0, x1, y0, y1, z0, z1, color, shiny) {  // the same part on the east (sd 1) or west (sd -1) side
+        if (sd > 0) cb(x0, x1, y0, y1, z0, z1, color, shiny); else cb(-x1, -x0, y0, y1, z0, z1, color, shiny);
+      }
+      [[-1160, -850], [-350, 510], [1010, 1160]].forEach(function (s) {
+        cb(-640, 640, 120, 640, s[0], s[1], PAINT, 1);          // lower body between the wheel openings
+        cb(-636, 636, 114, 120, s[0] + 4, s[1] - 4, BLACK);     // dark underside
+      });
+      [-600, 760].forEach(function (az) { cb(-640, 640, 500, 640, az - 250, az + 250, PAINT, 1); });  // over the wheels
+      cb(-590, 590, 640, 1160, -250, 1080, PAINT, 1);                                    // cabin
+      cb(-600, 600, 1160, 1185, -270, 1095, PAINT, 1);                                   // roof
+      piece(prism([-700, 640], [-250, 1160], [-250, 640], -590, 590), CX, 0, CZ, GLASS, 1);  // windshield
+      piece(prism([1080, 1160], [1160, 640], [1080, 640], -590, 590), CX, 0, CZ, PAINT, 1);  // hatch
+      piece(new THREE.BoxGeometry(1000, 360, 4).rotateX(-8.75 / D), CX, 942, CZ + 1116, GLASS, 1);  // rear window
+      cb(-650, 650, 150, 340, -1185, -1150, TRIM); cb(-650, 650, 150, 340, 1150, 1185, TRIM);       // bumpers
+      cb(-300, 300, 360, 450, -1166, -1160, BLACK);                                                  // grille
+      cb(-130, 130, 200, 290, -1191, -1185, "#f4f1e0"); cb(-130, 130, 200, 290, 1185, 1191, "#f4f1e0");  // plates
+      cb(-330, 330, 150, 500, -1100, -350, "#2a2a2c"); cb(-330, 330, 170, 500, 510, 1100, "#262628");  // engine, trunk floor
+      cb(-200, 200, 100, 150, -950, -700, "#333336");                                                // oil pan
+      cb(-300, 300, 92, 114, 150, 480, "#2a2a2c");                                                   // fuel tank
+      cb(-480, -250, 80, 114, 700, 960, "#4a4a4d");                                                  // muffler
+      piece(new THREE.CylinderGeometry(18, 18, 1480, 10).rotateX(Math.PI / 2), CX - 360, 96, CZ + 450, "#6d6d70");  // exhaust
+      [-600, 760].forEach(function (az) {                                                            // axles
+        piece(new THREE.CylinderGeometry(26, 26, 960, 10).rotateZ(Math.PI / 2), CX, 224, CZ + az, "#3a3a3c");
+      });
+      [-1, 1].forEach(function (sd) {
+        cbs(sd, 590, 596, 730, 1100, -200, 380, GLASS, 1); cbs(sd, 590, 596, 730, 1100, 450, 1010, GLASS, 1);  // side windows
+        cbs(sd, 636, 646, 120, 200, -350, 510, TRIM);                                                 // dark sill
+        cbs(sd, 640, 643, 200, 640, 80, 86, TRIM);                                                    // door gap
+        cbs(sd, 640, 648, 560, 580, -60, 20, TRIM); cbs(sd, 640, 648, 560, 580, 360, 440, TRIM);      // door handles
+        cbs(sd, 640, 720, 780, 860, -290, -210, PAINT, 1);                                            // side mirror
+        cbs(sd, 360, 570, 470, 570, -1166, -1160, "#fff4cc", 1);                                       // headlight
+        cbs(sd, 420, 600, 480, 620, 1160, 1166, "#d0201c", 1);                                         // taillight
+        [-600, 760].forEach(function (az) {
+          cbs(sd, 330, 380, 120, 500, az - 250, az + 250, BLACK);                                     // wheel well
+          cbs(sd, 380, 640, 488, 500, az - 250, az + 250, BLACK);
+          cbs(sd, 380, 641, 120, 500, az - 250, az - 244, BLACK); cbs(sd, 380, 641, 120, 500, az + 244, az + 250, BLACK);
+          // Tire (57 cm real = 456 m) with tread blocks; sidewall faces outward, silver wheel cover with 5 slots
+          var tx4 = CX + sd * 555, tz = CZ + az, t;
+          piece(new THREE.CylinderGeometry(222, 222, 150, 28).rotateZ(Math.PI / 2), tx4, 224, tz, "#1d1d1f");
+          for (t = 0; t < 28; t++) [-38, 38].forEach(function (ox, row) {
+            var ph = (t + row * 0.5) * 2 * Math.PI / 28;
+            piece(new THREE.BoxGeometry(66, 12, 34).rotateX(ph), tx4 + ox, 224 + Math.cos(ph) * 224, tz + Math.sin(ph) * 224, "#141415");
+          });
+          piece(new THREE.CylinderGeometry(205, 205, 4, 28).rotateZ(Math.PI / 2), CX + sd * 632, 224, tz, "#2b2b2e");
+          piece(new THREE.CylinderGeometry(140, 140, 6, 28).rotateZ(Math.PI / 2), CX + sd * 637, 224, tz, "#c9cdd2", 1);
+          piece(new THREE.CylinderGeometry(36, 36, 4, 16).rotateZ(Math.PI / 2), CX + sd * 641.5, 224, tz, "#8a8e93", 1);
+          for (t = 0; t < 5; t++) {
+            var sa3 = t * 72 / D;
+            piece(new THREE.BoxGeometry(3, 70, 24).rotateX(sa3), CX + sd * 641, 224 + Math.cos(sa3) * 88, tz + Math.sin(sa3) * 88, "#55595e", 1);
+          }
+        });
+      });
+      // White picket fence: pickets 9 x 2 cm real = 72 x 16 m with pointed tops, solid bottom board 16 cm = 130 m
+      var IRON = "#26272a";
+      function picket(xc, w, top) {
+        box(xc - w / 2, xc + w / 2, 120, top, 1200, 1216, WHITE);
+        piece(new THREE.BoxGeometry(w * 0.707, w * 0.707, 16).rotateZ(Math.PI / 4), xc, top, 1208, WHITE);
+      }
+      box(-3000, -260, -1, 130, 1199, 1217, WHITE);                              // bottom board, x -3000..-260
+      for (i = 0; i < 15; i++) picket(-2954 + i * 112, 72, 520);                 // fence behind the car
+      [170, 400].forEach(function (y) { box(-3000, -1340, y, y + 60, 1217, 1249, WHITE); });  // rails (south side)
+      [-2960, -2540, -2120, -1700].forEach(function (x) {
+        box(x - 40, x + 40, -1, 540, 1249, 1329, WHITE); box(x - 48, x + 48, 540, 554, 1241, 1337, WHITE);
+      });
+      [-1300, -700, -380].forEach(function (x) {                                 // gate posts with ball caps
+        box(x - 40, x + 40, -1, 620, 1198, 1278, WHITE); box(x - 48, x + 48, 620, 634, 1190, 1286, WHITE);
+        piece(new THREE.SphereGeometry(36, 10, 8), x, 668, 1238, WHITE);
+      });
+      function gate(x0, x1, hinge, tops) {  // one closed gate leaf with 3 pickets; frame and brace on the south side
+        var latch = hinge === x0 ? x1 : x0, s = hinge === x0 ? 1 : -1, gap = (x1 - x0 - 180) / 2;
+        for (var t = 0; t < 3; t++) picket(x0 + 30 + t * (60 + gap), 60, tops[t]);
+        [160, 380].forEach(function (y) { box(x0, x1, y, y + 50, 1217, 1241, WHITE); });
+        var dx = latch - hinge;
+        piece(new THREE.BoxGeometry(Math.hypot(dx, 220), 40, 24).rotateZ(Math.atan2(220, dx)), (hinge + latch) / 2, 295, 1229, WHITE);
+        [175, 395].forEach(function (y) { box(Math.min(hinge, hinge + s * 50), Math.max(hinge, hinge + s * 50), y, y + 20, 1195, 1199, IRON); });
+        box(Math.min(latch, latch - s * 36), Math.max(latch, latch - s * 36), 300, 330, 1194, 1199, IRON);  // latch
+        box(x0 - 1.5, x0 + 1.5, -1, 130, 1198.4, 1199, IRON); box(x1 - 1.5, x1 + 1.5, -1, 130, 1198.4, 1199, IRON);
+      }
+      gate(-1256, -1002, -1256, [540, 505, 470]); gate(-998, -744, -744, [470, 505, 540]);  // driveway gate (2 leaves)
+      gate(-656, -424, -424, [560, 600, 560]);                                             // garden gate on the walkway
+      var edgeObj = document.getElementById("yard-edges").object3D;
+      [{ roughness: 0.95 }, { roughness: 0.35 }, { roughness: 0.9, emissive: "#9a9a94" }].forEach(function (m, gi) {
+        m.vertexColors = true; m.flatShading = true;
+        edgeObj.add(new THREE.Mesh(merged(edges.filter(function (p) { return p[2] === gi; })), new THREE.MeshStandardMaterial(m)));
+      });
+
+      // ---- Rev 4: ant nest entrance, south-east lawn corner (built last, so all older detail stays the same) ----
+      // A crater of dug-out soil (about 2.5 cm across real = 200 m, rim 2-3 mm = 13-21 m tall) around a dark hole
+      // (4 mm real = 32 m). The rim is open to the north-west, where the ant walks out. The 8 rim blobs are solid
+      // circles (pushed into YARD.solids), so the ant cannot walk through the soil; the hole and loose grains are not solid.
+      // ONE merged mesh. Angles are measured from north-west (the open side).
+      var nestParts = [], NW = [-Math.SQRT1_2, -Math.SQRT1_2], NE = [Math.SQRT1_2, -Math.SQRT1_2];
+      var DIRT = ["#8a6a48", "#7a5a3c", "#9a7a56", "#6e5034"], GRAIN2 = ["#a8885e", "#8a6a48", "#c2a272", "#6e5034", "#5a4030"];
+      function soil(g, x, y, z, color) { nestParts.push([g.translate(x, y, z), new THREE.Color(color)]); }
+      function around(deg, dist) { var a = deg * DG; return [N.x + dist * (Math.cos(a) * NW[0] + Math.sin(a) * NE[0]), N.z + dist * (Math.cos(a) * NW[1] + Math.sin(a) * NE[1])]; }
+      soil(new THREE.RingGeometry(N.hole + 1, 118, 40).rotateX(-Math.PI / 2), N.x, 0.08, N.z, "#9a7a56");   // dusty soil on the lawn
+      soil(new THREE.RingGeometry(N.hole, N.hole + 1.5, 24).rotateX(-Math.PI / 2), N.x, 0.12, N.z, "#4a3424"); // dark lip
+      soil(new THREE.CircleGeometry(N.hole, 24).rotateX(-Math.PI / 2), N.x, 0.14, N.z, "#0c0704");           // the hole
+      for (var na = 40; na <= 320; na += 40) {
+        var bp = around(na, 70), bsy = 0.42 + 0.28 * (1 - Math.cos(na * DG)) / 2;   // taller at the back (south-east)
+        soil(new THREE.SphereGeometry(30, 10, 7).scale(1, bsy, 1), bp[0], 0, bp[1], pick(DIRT));
+        YARD.solids.push({ name: "nest rim", x: bp[0], z: bp[1], r: 30 });
+        var ip = around(na, 50);                                                   // inner bump down toward the hole
+        soil(new THREE.SphereGeometry(14, 8, 5).scale(1, 0.6, 1), ip[0], 0, ip[1], pick(DIRT));
+        for (k = 0; k < 12; k++) {                                                 // grains on the rim (0.5 mm real)
+          var gph = r() * Math.PI * 2, gel = (10 + r() * 75) * DG, gsz = 2 + r() * 2.5;
+          soil(new THREE.SphereGeometry(gsz, 6, 4), bp[0] + 30 * Math.cos(gel) * Math.cos(gph), 30 * bsy * Math.sin(gel), bp[1] + 30 * Math.cos(gel) * Math.sin(gph), pick(GRAIN2));
+        }
+      }
+      for (i = 0; i < 80; i++) {  // small grains the ants carried out, in front of the opening (not solid, so kept small)
+        var gp = around(r() * 140 - 70, 22 + r() * 110), gsz2 = 0.4 + r() * 1.4;
+        if (Math.hypot(gp[0] - START.x, gp[1] - START.z) < 6) continue;
+        soil(new THREE.SphereGeometry(gsz2, 6, 4), gp[0], gsz2 * 0.4, gp[1], pick(GRAIN2));
+      }
+      document.getElementById("yard-nest").object3D.add(new THREE.Mesh(merged(nestParts),
+        new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true })));
+
+      // ---- Place 1 (id heavy-cracker): a bitten M&M cookie (built last with its own random numbers, so all older detail
+      // stays the same). Round, 18 cm across real = radius 72 m, two layers (darker edge, lighter top), slightly wavy rim.
+      // Built in cookie-local units at 1/3 size (radius 24; x = east, z = south, y = up), then tipped 35 degrees (WEST edge
+      // up on a stone, top face looking east toward the ant coming from the nest) and scaled x3 into place. Three
+      // overlapping tooth arcs are bitten out of the south-east rim (left end when the ant comes from the east).
+      // Toppings: M&Ms and chocolate chips. Crumbs and a few dropped M&Ms lie on the sidewalk, most by the bite (south).
+      // Two merged meshes: matte (cookie, chips, stone, crumbs) and shiny (M&Ms).
+      var CK = { x: -540, z: 400, R: 24, S: 3, tilt: 35 * DG };
+      var BITES = [[2, 27, 12], [-8, 26, 11], [11, 24, 10]];  // tooth arcs [x, z, r], cookie-local
+      var ckSeed = 7;
+      function ckr() { ckSeed = (ckSeed * 9301 + 49297) % 233280; return ckSeed / 233280; }
+      var hw = CK.R * CK.S, cosT = Math.cos(CK.tilt), sinT = Math.sin(CK.tilt);
+      var CKM = new THREE.Matrix4().makeTranslation(CK.x, hw * sinT + 2.4 * CK.S * cosT, CK.z)  // low east edge on the ground
+        .multiply(new THREE.Matrix4().makeRotationZ(-CK.tilt)).multiply(new THREE.Matrix4().makeScale(CK.S, CK.S, CK.S));
+      var matte = [], shiny = [];
+      function outline(R) {  // wavy circle with the bite cut out; [x, z] points, cookie-local
+        var pts = [];
+        for (k = 0; k < 96; k++) {
+          var th = k / 96 * 2 * Math.PI, ux = Math.cos(th), uz = Math.sin(th), rr = R * (1 + 0.025 * Math.sin(th * 7));
+          BITES.forEach(function (b) {  // ray from the center hits a tooth arc: stop at its near side
+            var cx = b[0] * R / 24, cz = b[1] * R / 24, br = b[2] * R / 24, uc = ux * cx + uz * cz, disc = uc * uc - (cx * cx + cz * cz) + br * br;
+            if (disc > 0) { var tt = uc - Math.sqrt(disc); if (tt > 0 && tt < rr) rr = Math.max(tt, 0.4 * R); }
+          });
+          pts.push([ux * rr, uz * rr]);
+        }
+        return pts;
+      }
+      function slab(R, h, y, color) {  // one layer: the outline extruded h thick (bevelled), centered on y
+        var g = new THREE.ExtrudeGeometry(new THREE.Shape(outline(R).map(function (q) { return new THREE.Vector2(q[0], q[1]); })),
+          { depth: h, bevelEnabled: true, bevelThickness: 0.8, bevelSize: 0.8, bevelSegments: 1 });
+        matte.push([g.rotateX(Math.PI / 2).translate(0, y + h / 2, 0).applyMatrix4(CKM), new THREE.Color(color)]);
+      }
+      slab(24, 4.4, 0, "#c98a45"); slab(22.6, 1.2, 2.4, "#dba35c");
+      function inBite(x, z) { return BITES.some(function (b) { return Math.hypot(x - b[0], z - b[1]) < b[2] + 2.5; }); }
+      var MM = ["#d62828", "#1d4ed8", "#facc15", "#16a34a", "#f97316", "#7c3f1d"];  // red, blue, yellow, green, orange, brown
+      for (i = 0; i < 22; i++) {  // M&Ms (1.2 cm real), flattened, on the top face
+        var ta = ckr() * 6.283, td = 4 + ckr() * 16, tx6 = Math.cos(ta) * td, tz6 = Math.sin(ta) * td;
+        if (inBite(tx6, tz6)) continue;
+        shiny.push([new THREE.SphereGeometry(1.7, 12, 8).scale(1, 0.5, 1).translate(tx6, 3.9, tz6).applyMatrix4(CKM), new THREE.Color(MM[i % 6])]);
+      }
+      for (i = 0; i < 10; i++) {  // dark chocolate chips
+        var ca2 = ckr() * 6.283, cd2 = 3 + ckr() * 18, cx6 = Math.cos(ca2) * cd2, cz6 = Math.sin(ca2) * cd2;
+        if (inBite(cx6, cz6)) continue;
+        matte.push([new THREE.CylinderGeometry(0.2, 1.1, 1.4, 6).translate(cx6, 4.2, cz6).applyMatrix4(CKM), new THREE.Color("#3b2314")]);
+      }
+      var stoneTop = 2 * hw * sinT, stoneK = stoneTop / 12;  // stone under the raised west edge, scaled to its height
+      matte.push([new THREE.SphereGeometry(7.2, 9, 6).scale(stoneK, stoneK, stoneK)
+        .translate(CK.x - hw * cosT - stoneTop * 0.25, stoneTop * 0.45, CK.z), new THREE.Color("#8f877b")]);
+      var CRUMBS = ["#c98a45", "#dba35c", "#b5783a", "#e2b06c"];
+      for (i = 0; i < 70; i++) {  // cookie crumbs (1-4 m), 60% by the bite (south)
+        var ang = ckr() * 6.283, dist = 78 + ckr() * 110;
+        if (ckr() < 0.6) { ang = Math.PI / 2 + (ckr() - 0.5) * 1.4; dist = 70 + ckr() * 70; }
+        var csz = 0.8 + ckr() * 2.8, crx = CK.x + Math.cos(ang) * dist, crz = CK.z + Math.sin(ang) * dist;
+        matte.push([new THREE.DodecahedronGeometry(csz, 0).applyMatrix4(new THREE.Matrix4().compose(new V3(crx, csz * 0.45, crz),
+          new THREE.Quaternion().setFromEuler(new THREE.Euler(ckr() * 3, ckr() * 3, ckr() * 3)), new V3(1, 0.6, 1))), new THREE.Color(CRUMBS[i % 4])]);
+        if (i % 5 === 0 && i < 16) {  // 4 dropped M&Ms
+          shiny.push([new THREE.SphereGeometry(3.2, 12, 8).scale(1, 0.5, 1).translate(crx + 10, 1.5, crz + 6), new THREE.Color(MM[i / 5])]);
+        }
+      }
+      var ckObj = document.getElementById("place-heavy-cracker").object3D;
+      ckObj.add(new THREE.Mesh(merged(matte), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true })));
+      ckObj.add(new THREE.Mesh(merged(shiny), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.05 })));
+      YARD.solids.filter(function (f) { return f.name === "cookie"; })[0].poly =  // map outline: round cookie with the bite
+        outline(CK.R).map(function (q) { return [q[0] * CK.S, q[1] * CK.S]; });
+
+      // Stage 4: one glowing hotspot (pulsing ring + arrow) per placed place (js/hotspots.js). Not in YARD.solids:
+      // it floats above the place, so it never blocks walking.
+      var scene = document.querySelector("a-scene");
+      placed.forEach(function (p) {
+        add(scene, "a-entity", { class: "hotspot", position: p.x + " 0 " + p.z, hotspot: "id: " + p.id + "; tip: " + p.tip });
+      });
+
+      // Start view: out of the nest into the yard (yaw) and tilted up so things loom
+      function tilt() {
+        var lc = document.getElementById("cam").components["look-controls"];
+        lc.pitchObject.rotation.x = THREE.MathUtils.degToRad(START.tilt);
+        lc.yawObject.rotation.y = THREE.MathUtils.degToRad(START.yaw);
+      }
+      if (scene.hasLoaded) tilt(); else scene.addEventListener("loaded", tilt);
+    })();
+  </script>
+</body>
+</html>

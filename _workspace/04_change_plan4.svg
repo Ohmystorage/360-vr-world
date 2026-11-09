@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 760" font-family="Segoe UI, Malgun Gothic, sans-serif">
+  <rect width="1500" height="760" fill="#fbfaf6"/>
+  <text x="750" y="38" text-anchor="middle" font-size="26" font-weight="700" fill="#222">수정안 4: 문 앞의 사람 · 개미집에서 출발 · 편지 아이콘 + Read 버튼</text>
+
+  <!-- PANEL A: person at doormat -->
+  <text x="250" y="80" text-anchor="middle" font-size="19" font-weight="700" fill="#c2185b">① 도어매트: 집에 들어가는 사람 (개미 눈높이)</text>
+  <g transform="translate(20,95)">
+    <rect width="460" height="330" fill="#cfd8df"/>
+    <!-- house wall + door -->
+    <rect x="0" y="0" width="460" height="230" fill="#e6dccb"/>
+    <rect x="150" y="0" width="190" height="150" fill="#7b4a2e"/>
+    <!-- steps -->
+    <rect x="110" y="150" width="270" height="30" fill="#b9b6ae"/>
+    <rect x="90" y="180" width="310" height="34" fill="#c9c6be"/>
+    <!-- doormat -->
+    <rect x="40" y="232" width="400" height="24" fill="#8a5a2b"/>
+    <g stroke="#c9a15e" stroke-width="2">
+      <line x1="50" y1="232" x2="48" y2="220"/><line x1="70" y1="232" x2="72" y2="219"/><line x1="90" y1="232" x2="88" y2="221"/><line x1="110" y1="232" x2="112" y2="220"/><line x1="350" y1="232" x2="352" y2="220"/><line x1="370" y1="232" x2="368" y2="219"/><line x1="390" y1="232" x2="392" y2="221"/><line x1="410" y1="232" x2="408" y2="220"/>
+    </g>
+    <rect x="0" y="256" width="460" height="74" fill="#a8a8a5"/>
+    <!-- standing leg on first step -->
+    <rect x="285" y="0" width="70" height="160" fill="#2f4a7a"/>
+    <path d="M270,160 L370,160 Q395,165 395,180 L265,180 Q262,166 270,160 z" fill="#1f4fa0"/>
+    <rect x="262" y="176" width="136" height="8" fill="#f0f0f0"/>
+    <!-- lifted leg / foot over the mat -->
+    <rect x="150" y="0" width="70" height="95" fill="#2f4a7a" transform="rotate(-8 185 95)"/>
+    <path d="M110,110 Q120,92 175,95 L255,100 Q270,104 266,122 L120,128 Q104,124 110,110 z" fill="#1f4fa0"/>
+    <path d="M118,128 L266,122 L266,132 L120,138 z" fill="#f0f0f0"/>
+    <g stroke="#bbb" stroke-width="2"><line x1="135" y1="136" x2="135" y2="129"/><line x1="160" y1="135" x2="160" y2="128"/><line x1="185" y1="134" x2="185" y2="127"/><line x1="210" y1="133" x2="210" y2="126"/><line x1="235" y1="132" x2="235" y2="125"/></g>
+    <!-- shadow on mat -->
+    <ellipse cx="190" cy="244" rx="85" ry="8" fill="#000" opacity="0.25"/>
+    <!-- ring with envelope -->
+    <circle cx="190" cy="196" r="20" fill="none" stroke="#f59cc8" stroke-width="5"/>
+    <rect x="179" y="189" width="22" height="15" rx="2" fill="#fff" stroke="#e0186f" stroke-width="2"/>
+    <path d="M179,190 L190,198 L201,190" fill="none" stroke="#e0186f" stroke-width="2"/>
+  </g>
+  <g font-size="14" fill="#333">
+    <text x="20" y="450">• 사람은 다리와 신발만 보임 (실제 키 1.7m → 개미에겐 1km 넘음)</text>
+    <text x="20" y="472">• 한 발은 계단 첫 단, 다른 발은 매트 위로 들려 개미 머리 위를 덮음</text>
+    <text x="20" y="494">• 지금 놓여 있는 운동화 대신 이 사람의 신발 · 사람은 움직이지 않음</text>
+  </g>
+
+  <!-- PANEL B: minimap with nest -->
+  <text x="750" y="80" text-anchor="middle" font-size="19" font-weight="700" fill="#c2185b">② 개미집 입구에서 출발</text>
+  <g transform="translate(560,95)">
+    <rect width="380" height="330" rx="8" fill="#5a8a46" stroke="#fff" stroke-width="3"/>
+    <rect x="0" y="0" width="380" height="45" fill="#7d5a44"/>
+    <rect x="0" y="0" width="95" height="330" fill="#3a3a3a"/>
+    <rect x="125" y="45" width="40" height="285" fill="#cfcac0"/>
+    <rect x="120" y="100" width="70" height="40" fill="#b08a5a"/>
+    <rect x="230" y="45" width="6" height="135" fill="#7a6250"/>
+    <rect x="245" y="110" width="110" height="80" fill="#6b4a32"/>
+    <circle cx="155" cy="120" r="9" fill="#ff4fa3" stroke="#fff" stroke-width="2"/><text x="175" y="115" font-size="12" fill="#fff">도어매트</text>
+    <circle cx="145" cy="215" r="9" fill="#ff4fa3" stroke="#fff" stroke-width="2"/><text x="170" y="220" font-size="12" fill="#fff">크래커</text>
+    <circle cx="232" cy="150" r="9" fill="#ff4fa3" stroke="#fff" stroke-width="2"/><text x="250" y="210" font-size="12" fill="#fff">거미줄</text>
+    <!-- nest -->
+    <circle cx="335" cy="295" r="14" fill="#8b5a2b" stroke="#fff" stroke-width="2"/>
+    <circle cx="335" cy="295" r="5" fill="#2a1a0e"/>
+    <text x="300" y="275" font-size="12" fill="#fff" font-weight="700">개미집 (출발)</text>
+    <path d="M320,290 Q240,260 155,222" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="6 5"/>
+    <path d="M145,205 Q135,170 152,132" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="6 5"/>
+    <path d="M166,120 Q200,140 222,150" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="6 5"/>
+  </g>
+  <g font-size="14" fill="#333">
+    <text x="560" y="450">• 남동쪽 잔디 구석에 흙 더미 + 구멍 (개미집)</text>
+    <text x="560" y="472">• 시작 화면: 개미집을 등지고 마당 쪽을 바라봄</text>
+    <text x="560" y="494">• 세 곳 다 도는 데 약 1분 20초 (지도의 글자는 설명용, 실제 지도엔 없음)</text>
+  </g>
+
+  <!-- PANEL C: read button -->
+  <text x="1250" y="80" text-anchor="middle" font-size="19" font-weight="700" fill="#c2185b">③ 편지 아이콘 + Read 버튼</text>
+  <g transform="translate(1020,95)">
+    <rect width="460" height="330" fill="#bcd9f0"/>
+    <rect x="0" y="200" width="460" height="130" fill="#a9a9a6"/>
+    <path d="M0,200 Q60,150 120,195 Q180,140 240,190 Q320,150 380,195 Q420,160 460,190 L460,200 L0,200 z" fill="#5f9a3e"/>
+    <path d="M130,215 L330,190 L360,198 L360,240 L140,245 z" fill="#e0a33c"/>
+    <circle cx="245" cy="150" r="24" fill="none" stroke="#f59cc8" stroke-width="5.5"/>
+    <rect x="231" y="141" width="28" height="19" rx="2" fill="#fff" stroke="#e0186f" stroke-width="2.5"/>
+    <path d="M231,142 L245,152 L259,142" fill="none" stroke="#e0186f" stroke-width="2.5"/>
+    <!-- button -->
+    <rect x="120" y="268" width="220" height="44" rx="22" fill="#e0186f"/>
+    <text x="230" y="297" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">✉ Read the message</text>
+    <text x="230" y="325" text-anchor="middle" font-size="11" fill="#333">click or press Enter</text>
+  </g>
+  <g font-size="14" fill="#333">
+    <text x="1020" y="450">• 고리 안 화살표 → 편지 아이콘</text>
+    <text x="1020" y="472">• 가까이(약 400m) 가면 화면 아래 큰 버튼이 나타남</text>
+    <text x="1020" y="494">• 버튼 클릭, Enter 키, 고리 클릭 중 아무거나 → 카드 열림</text>
+    <text x="1020" y="516">• 멀어지면 버튼이 사라짐</text>
+  </g>
+
+  <rect x="20" y="560" width="1460" height="150" rx="10" fill="#fff" stroke="#ddd"/>
+  <text x="40" y="592" font-size="17" font-weight="700" fill="#222">그대로인 것</text>
+  <text x="40" y="620" font-size="14" fill="#333">걷는 속도, 카드 글(js/problems.js), 크래커·거미줄 장소, 경계, 미니맵의 빛나는 점과 체크, 고리 크기(50%)와 깜빡임, 걷기 멈춤</text>
+  <text x="40" y="652" font-size="17" font-weight="700" fill="#222">나중에 (5단계 다음)</text>
+  <text x="40" y="680" font-size="14" fill="#333">시작 전 안내 페이지: 만든 목적, 수업 활용법, 필요한 기기, 조작법</text>
+  <text x="750" y="740" text-anchor="middle" font-size="13" fill="#666">그림은 단순하게 그린 예시입니다. 실제 화면은 지금 장면들과 같은 스타일로 만듭니다.</text>
+</svg>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Intro mock 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;font-family:Nunito,"Segoe UI",sans-serif;color:#2b2118}
+  body{background:url(06_bg_cracker.png) center/cover no-repeat}
+  .sky{position:fixed;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 42%,rgba(255,250,235,.55) 62%,rgba(255,250,235,.92) 78%)}
+  .hero{position:absolute;left:56px;top:40px;width:560px}
+  .tag{display:inline-block;background:#ffd54f;color:#5a3c00;font-weight:800;font-size:15px;padding:4px 12px;border-radius:20px;transform:rotate(-3deg)}
+  h1{font-family:"Baloo 2",sans-serif;font-size:76px;line-height:.95;margin:10px 0 8px;color:#fff;
+     text-shadow:0 4px 0 #c2185b,0 8px 18px rgba(0,0,0,.35)}
+  .sub{font-size:22px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.45);margin-bottom:22px}
+  .btn{display:inline-flex;align-items:center;gap:12px;background:#e0186f;color:#fff;font-family:"Baloo 2",sans-serif;font-size:28px;font-weight:800;
+       padding:12px 30px 10px;border-radius:44px;box-shadow:0 6px 0 #9c0f4c,0 12px 24px rgba(0,0,0,.3)}
+  .btn svg{width:34px;height:34px}
+  .steps{position:absolute;left:56px;right:56px;bottom:118px;display:flex;gap:22px}
+  .card{flex:1;background:#fff;border-radius:22px;padding:14px 18px 14px 14px;display:flex;align-items:center;gap:14px;
+        box-shadow:0 8px 22px rgba(80,50,10,.18);border:3px solid #fff}
+  .card .ic{width:84px;height:84px;flex:none;border-radius:18px;display:grid;place-items:center}
+  .card b{font-family:"Baloo 2",sans-serif;font-size:30px;display:block;line-height:1}
+  .card span{font-size:17px;font-weight:600;color:#5b4a3a}
+  .c1 .ic{background:#fff1c4}.c2 .ic{background:#ffe0ee}.c3 .ic{background:#dff3d4}
+  .c1 b{color:#c77800}.c2 b{color:#d81b75}.c3 b{color:#2e8b3a}
+  .bar{position:absolute;left:56px;right:56px;bottom:26px;display:flex;justify-content:space-between;align-items:center}
+  .pill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.85);border-radius:30px;padding:8px 16px;font-weight:800;font-size:16px}
+  kbd{background:#fff;border:2px solid #cbbfa8;border-bottom-width:4px;border-radius:7px;padding:1px 8px;font-family:inherit;font-size:14px}
+  .need{display:flex;gap:10px}
+  .vr{background:#2b2118;color:#ffd54f}
+  .ants{position:absolute;left:700px;top:492px}
+</style></head>
+<body><div class="sky"></div>
+
+<div class="hero">
+  <span class="tag">You are 800 times smaller!</span>
+  <h1>Ant's-Eye<br>World</h1>
+  <div class="sub">Walk the yard as a tiny ant.</div>
+  <div class="btn">Enter the Ant's-Eye World
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#fff"/><path d="M10 7l6 5-6 5z" fill="#e0186f"/></svg></div>
+</div>
+
+<!-- marching ants on the sidewalk -->
+<svg class="ants" width="420" height="60" viewBox="0 0 420 60">
+  <defs><g id="ant" fill="#1c1410"><ellipse cx="0" cy="0" rx="7" ry="5.5"/><ellipse cx="12" cy="-1" rx="5" ry="4"/><ellipse cx="27" cy="-2" rx="11" ry="7.5"/>
+    <path d="M10,3 L4,13 M13,3 L13,14 M16,3 L22,13 M-4,-4 L-11,-14 M-2,-5 L-4,-16" stroke="#1c1410" stroke-width="2" fill="none"/></g></defs>
+  <use href="#ant" transform="translate(30,30) scale(-1,1)"/>
+  <use href="#ant" transform="translate(110,34) scale(-1,1)"/>
+  <g transform="translate(190,30) scale(-1,1)"><use href="#ant"/><rect x="-10" y="-20" width="16" height="10" rx="2" fill="#e0a33c" transform="scale(-1,1)"/></g>
+  <use href="#ant" transform="translate(270,33) scale(-1,1)"/>
+</svg>
+
+<div class="steps">
+  <div class="card c1"><div class="ic">
+    <svg width="64" height="64" viewBox="0 0 64 64"><path d="M6 50 Q20 40 32 46 T58 40" stroke="#c77800" stroke-width="3" stroke-dasharray="5 5" fill="none"/>
+    <g transform="translate(22,28)" fill="#1c1410"><ellipse cx="0" cy="0" rx="6" ry="5"/><ellipse cx="11" cy="-1" rx="4.5" ry="3.5"/><ellipse cx="24" cy="-2" rx="10" ry="7"/>
+    <path d="M9,3 L4,12 M12,3 L12,13 M15,3 L20,12 M-3,-4 L-9,-13" stroke="#1c1410" stroke-width="2" fill="none"/></g></svg></div>
+    <div><b>1. Explore</b><span>Walk out of your nest.</span></div></div>
+  <div class="card c2"><div class="ic">
+    <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="none" stroke="#f59cc8" stroke-width="6"/>
+    <rect x="19" y="23" width="26" height="18" rx="2" fill="#fff" stroke="#e0186f" stroke-width="2.5"/><path d="M19 24l13 9 13-9" fill="none" stroke="#e0186f" stroke-width="2.5"/></svg></div>
+    <div><b>2. Find</b><span>Read the ants' problems.</span></div></div>
+  <div class="card c3"><div class="ic">
+    <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="24" cy="24" r="13" fill="#ffd54f"/><rect x="19" y="36" width="10" height="7" rx="2" fill="#9e9e9e"/>
+    <path d="M24 4v4M8 10l3 3M40 10l-3 3" stroke="#f0b400" stroke-width="3"/>
+    <g transform="rotate(40 44 44)"><rect x="40" y="22" width="9" height="34" rx="2" fill="#4caf50"/><path d="M40 56l4.5 8 4.5-8z" fill="#f2d2a0"/><rect x="40" y="20" width="9" height="5" fill="#e57373"/></g></svg></div>
+    <div><b>3. Design</b><span>Build a helper for them!</span></div></div>
+</div>
+
+<div class="bar">
+  <div class="pill"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> walk &nbsp;·&nbsp; 🖱 look &nbsp;·&nbsp; <kbd>Enter</kbd> read</div>
+  <div class="need">
+    <div class="pill">💻 Laptop + internet</div>
+    <div class="pill">🖱 Mouse</div>
+    <div class="pill vr">🥽 VR headset = feel like a real ant!</div>
+  </div>
+</div>
+</body></html>
