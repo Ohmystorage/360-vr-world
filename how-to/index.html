@@ -118,7 +118,7 @@
     { title: "Plan", short: "Who · goal · tools",
       desc: "Who the world is for, what it should teach, and which tools to use were decided first.",
       fig: "Start page",
-      say: "Hi! First up: who this world is for.",
+      say: "The world was built in 5 steps, starting with who it is for.",
       btns: [
         ["Audience", ["Grade 3 to 5 students", "Laptop and mouse; walk with arrow keys or WASD", "A VR headset makes it feel real (not required)"]],
         ["Goal", ["Feel what life is like for a tiny ant", "Read 3 real ant problems", "Design something that helps the ants"]],
@@ -137,7 +137,7 @@
     { title: "Assets", short: "Yard at ant size",
       desc: "Everything in the yard is made at ant size.",
       fig: "The bitten cookie",
-      say: "Look how big that cookie is! Everything is giant when you are an ant.",
+      say: "Everything in the yard is scaled to ant size.",
       btns: [
         ["The yard", ["No 3D model files", "Grass, fence, house, car, cookie and person are made from shapes in code"]],
         ["Ant size", ["You are 800 times smaller", "One blade of grass is taller than you"]],
@@ -147,7 +147,7 @@
     { title: "Build the world", short: "Walk · rings · map",
       desc: "Everything is put together into one world you can walk in.",
       fig: "Pink ring and Read button",
-      say: "Time to snap all the pieces together!",
+      say: "Ant's-eye view, walking, messages and the mini map are combined into one world.",
       btns: [
         ["Ant's-eye view", ["The camera sits just above the ground", "You start at the ant nest"]],
         ["Walking", ["Arrow keys or WASD", "You can't walk through solid things"]],
@@ -157,7 +157,7 @@
     { title: "Publish", short: "Online link",
       desc: "The world is put online so anyone with the link can visit.",
       fig: "Giant feet at the doormat",
-      say: "Last step! One link, and your whole class can visit.",
+      say: "One link lets a whole class visit the world.",
       btns: [
         ["Vercel", ["Vercel turns the files into a website", "After a fix, the files are uploaded again and the same link shows the new version"]],
         ["VR headsets", ["Headsets need a secure (https) link", "Vercel provides one"]]
@@ -165,7 +165,7 @@
   ];
 
   var $ = function (id) { return document.getElementById(id); };
-  var seen = {}, open = -1, HELLO = "Hey there! Here's how this world got built, in 5 steps.";
+  var seen = {}, open = -1, HELLO = "This page explains how the world was built, in 5 steps.";
 
   $("steps").innerHTML = STEPS.map(function (s, i) {
     return '<button class="step" data-i="' + i + '" aria-expanded="false"><span class="n">' + (i + 1) +
@@ -214,7 +214,7 @@
     open = -1;
     $("panel").hidden = true;
     $("hint").hidden = false;
-    $("say").textContent = paint() === STEPS.length ? "You've seen all 5 steps. Nice work!" : "Click another step to keep going.";
+    $("say").textContent = paint() === STEPS.length ? "All 5 steps have been viewed." : "Click another step to keep going.";
     if (was >= 0) $("steps").children[was].focus();
   }
 
