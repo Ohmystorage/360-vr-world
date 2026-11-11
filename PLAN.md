@@ -170,3 +170,6 @@ Teacher clarified that all Exit VR requests are about the headset view: in the Q
 
 ## 2026-11-11 — Quest fixes pushed
 Commit 63ec929 pushed to main (author Ohmystorage; zips and .claude/launch.json left out). GitHub Pages served world.html with ?v=2026111101 about 50 s later. Next: teacher tests on the Quest.
+
+## 2026-11-11 — Synced again; local preview
+Fetched GitHub: 3 commits from the other device (05fb0b3 cards in the headset + joystick walking, 63ec929 the 5 Quest fixes, d8084d4 handoff notes); fast-forwarded this folder to d8084d4 (nothing local to merge). Ran a local preview on port 8130 (`python3 -m http.server 8130`): the intro page loads; the headset parts only show in a Quest. Earlier this session: GitHub repo + Pages + tinker site buttons + CLI deploy (see DECISIONS 2026-11-11). Two zips were made in Downloads for moving between devices (`360-vr-world_full.zip` with .git, `360-vr-world_light.zip` without .git); never commit them.

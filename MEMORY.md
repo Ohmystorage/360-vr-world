@@ -1,6 +1,6 @@
 # MEMORY.md — current snapshot (overwrite each time)
 
-Last updated: 2026-11-10 (Quest fixes after the first headset test built, not pushed)
+Last updated: 2026-11-11 (synced to GitHub d8084d4; Quest fixes live; waiting for the teacher's Quest test)
 
 ## Done
 - 3-place test version (stages 0-5 approved, QA PASS `_workspace/05_qa-tester_report.md`):
@@ -15,7 +15,7 @@ Last updated: 2026-11-10 (Quest fixes after the first headset test built, not pu
 - Online:
   - GitHub (public) https://github.com/Ohmystorage/360-vr-world
   - GitHub Pages https://ohmystorage.github.io/360-vr-world/
-  - Linked from the tinker site's "Prompt a 360° World" card.
+  - Linked from the tinker site's "Prompt a 360° World" card (Example -> Pages root, How to -> /how-to/). tinker-with-ai.vercel.app is deployed by CLI, not git: after editing `ai-in-k12/index.html` in repo `ai-tinkery-webpage` (folder `11072026_AI_Tinkery_Webpage/ai-in-k12`, linked to the Vercel project), run `vercel deploy --prod` there; a push alone does not update the site.
 - 2026-11-10: synced with the other device twice.
   - Their MEMORY.md recorded the teacher's Quest feedback: only look-around works; cards are invisible.
 - 2026-11-10: Quest 2 / 3 / 3S stages 1 + 2 built and pushed (commit `05fb0b3`). Pages is live with them.
@@ -43,7 +43,7 @@ Last updated: 2026-11-10 (Quest fixes after the first headset test built, not pu
 
 ## In progress
 - Waiting for the teacher to test the fixes (commit 63ec929) on the Quest.
-- Uncommitted: only the notes written after the push (PLAN.md, MEMORY.md, `_workspace/status.md`).
+- Nothing uncommitted from the other device. This folder was fast-forwarded to d8084d4 on 2026-11-11 (a local preview on port 8130 may still be running: stop it with `kill $(lsof -tiTCP:8130 -sTCP:LISTEN)`).
 
 ## Next
 1. Get the Quest test feedback. Ask about: line direction vs the hand, trigger, Exit button placement (top right; move with one number if it is too far in or out), blink comfort, card distance/zoom, speed.
@@ -86,7 +86,7 @@ Last updated: 2026-11-10 (Quest fixes after the first headset test built, not pu
   - Then emit `thumbstickmoved` / `abuttondown` on `#hand-left` / `#hand-right`, and step frames with `scene.tick(t, 16.667)`.
 - Plan images: write an HTML file in `_workspace/` and render it with headless Edge (`--screenshot`, run through PowerShell Start-Process).
 
-## Next-session start prompt (copy and paste)
+## 다음 세션 시작 프롬프트 (Next-session start prompt, copy and paste)
 ```
 Goal: make the Ant's-Eye World (A-Frame, grades 3-5) work well inside Meta Quest 2/3/3S; the 5 fixes from the first Quest test (pointer line + trigger, card zoom, 30 deg turns with blink, "Exit VR" button at the top right, 70% speed) are pushed and live on GitHub Pages (commit 63ec929).
 Read first: MEMORY.md, PLAN.md and DECISIONS.md (latest 2026-11-10 entries), CLAUDE.md, _workspace/status.md, _workspace/15_vr_fix_plan.png, _workspace/16_vr_fix_result.png, _workspace/18_exit_result.png, world.html, js/vr.js, js/components.js (ant-walk), js/hotspots.js, .claude/skills/ant-world-orchestrator/SKILL.md.
