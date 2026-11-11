@@ -43,7 +43,7 @@ Last updated: 2026-11-11 (synced to GitHub d8084d4; Quest fixes live; waiting fo
 
 ## In progress
 - Waiting for the teacher to test the fixes (commit 63ec929) on the Quest.
-- Nothing uncommitted from the other device. This folder was fast-forwarded to d8084d4 on 2026-11-11 (a local preview on port 8130 may still be running: stop it with `kill $(lsof -tiTCP:8130 -sTCP:LISTEN)`).
+- Nothing uncommitted from the other device. This folder was fast-forwarded to d8084d4 on 2026-11-11 (the local preview on port 8130 was stopped)..
 
 ## Next
 1. Get the Quest test feedback. Ask about: line direction vs the hand, trigger, Exit button placement (top right; move with one number if it is too far in or out), blink comfort, card distance/zoom, speed.
