@@ -37,3 +37,4 @@
 - 2026-11-10: Teacher tested on a Quest: 5 fixes (card zoom, pointer line, 30 deg turns, Exit VR inside, 30% slower). Plan _workspace/15_vr_fix_plan.png approved; built in js/vr.js. Simulated VR checks pass; desktop unchanged. Result _workspace/16_vr_fix_result.png. Not pushed. Waiting for teacher.
 - 2026-11-10: Exit button moved to the top right and made to look like Enter VR (plan _workspace/17_exit_plan.png, option ga). Simulated VR checks pass. Result _workspace/18_exit_result.png. Not pushed. Waiting for teacher.
 - 2026-11-11: Exit button in the headset now reads "Exit VR" (white border, top right, plan _workspace/20_exit_text_plan.png). Simulated VR checks pass. Not pushed. Waiting for teacher.
+- 2026-11-11: Quest fixes pushed (63ec929), live on GitHub Pages. Waiting for the teacher's Quest test.

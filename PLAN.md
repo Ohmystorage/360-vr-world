@@ -167,3 +167,6 @@ Teacher: the Exit VR button should sit at the top right (like the Enter VR butto
 
 ## 2026-11-11 — Exit button says "Exit VR" (headset)
 Teacher clarified that all Exit VR requests are about the headset view: in the Quest the teacher sees an "Enter VR" text button at the top right (not part of our pages; we could not see it from the computer). Plan _workspace/20_exit_text_plan.png (white border, higher and further right) approved. Built in js/vr.js: head-locked "Exit VR" button, bold white Arial, 3 px white border, black 45% (pink #ef2d5e when a line points at it), plane 0.24 x 0.084 m at (0.76, 0.64, -1.0) = about 37 deg right, 33 deg up; always visible in VR. Script tags ?v=2026111101. Simulated VR (96 deg view): visible top right, pink on hover, trigger calls scene.exitVR. Screenshot _workspace/21_exit_text_result.jpg. Not pushed.
+
+## 2026-11-11 — Quest fixes pushed
+Commit 63ec929 pushed to main (author Ohmystorage; zips and .claude/launch.json left out). GitHub Pages served world.html with ?v=2026111101 about 50 s later. Next: teacher tests on the Quest.
