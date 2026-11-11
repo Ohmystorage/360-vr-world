@@ -145,7 +145,10 @@
       for (k = 0; k < 2; k++) for (i = 0; i < Y.solids.length; i++) pushOut(p, Y.solids[i]);
       p.x = Math.min(b.x1, Math.max(b.x0, p.x));
       p.z = Math.min(b.z1, Math.max(b.z0, p.z));
-      cam.x = p.x - rig.x; cam.z = p.z - rig.z;
+      // Computer: the keyboard moves the camera, so correct the camera. Headset: A-Frame freezes the camera entity and
+      // js/vr.js walks the rig, so correct the rig (same walls either way).
+      if (this.el.sceneEl.is("vr-mode")) { rig.x = p.x - cam.x; rig.z = p.z - cam.z; }
+      else { cam.x = p.x - rig.x; cam.z = p.z - rig.z; }
 
       if (!this.v) { this.v = view(Y); drawMap(this.base, Y, this.v); }
       if (this.pulse && t > this.nextSpots) { this.nextSpots = t + 40; this.pulse = drawSpots(this.spots, this.v, t); }  // glow: ~25 fps, stops when all read

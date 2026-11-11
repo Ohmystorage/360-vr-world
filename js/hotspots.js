@@ -2,7 +2,10 @@
    world.html makes one <a-entity class="hotspot" hotspot="id; tip"> per placed place (at its PLACES x, z).
    Clicking one (scene cursor="rayOrigin: mouse", raycaster objects .hotspot) opens the card from
    window.ANT_PROBLEMS. Rev 4: near a place, a big "Read the message" button (or Enter) opens it too.
-   window.ANT_READ remembers opened cards; the minimap (components.js) draws check marks. */
+   window.ANT_READ remembers opened cards; the minimap (components.js) draws check marks.
+   Quest: js/vr.js shows the same card inside the headset (A or X opens and closes it). It listens to the events
+   "ant-card-open", "ant-card-close" and "ant-hint" sent from here and uses window.antNearest / antReadNearest /
+   antCloseCard. */
 (function () {
   var READ_DIST = 400;   // the ant must be this close to the place (PLACES x, z) to open its card (~10 s walk)
   var R = 4;             // ring size unit in scene m at scale 1 (rev 2: half of the old 8)
@@ -93,6 +96,7 @@
     h.textContent = text; h.hidden = false;
     clearTimeout(hintTimer);
     hintTimer = setTimeout(function () { h.hidden = true; }, 2500);
+    document.dispatchEvent(new CustomEvent("ant-hint", { detail: text }));
   }
 
   window.antOpenCard = function (id) {
@@ -124,6 +128,7 @@
     openId = id;
     $("card-close").focus();
     if (!window.ANT_READ[id]) { window.ANT_READ[id] = true; document.dispatchEvent(new Event("ant-read")); }
+    document.dispatchEvent(new CustomEvent("ant-card-open", { detail: card }));
   };
 
   function closeCard() {
@@ -132,6 +137,7 @@
     openId = null;
     freeze(false);
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();  // keys go back to the scene
+    document.dispatchEvent(new Event("ant-card-close"));
   }
 
   // Rev 4: the Read button shows while the ant is within READ_DIST of a place and no card is open (checked 10x a second).
@@ -146,6 +152,9 @@
     }
   });
   function readNearest() { var id = !openId && nearest(); if (id) window.antOpenCard(id); }
+  window.antNearest = nearest;          // for js/vr.js
+  window.antReadNearest = readNearest;
+  window.antCloseCard = closeCard;
 
   document.addEventListener("DOMContentLoaded", function () {
     $("card-close").addEventListener("click", closeCard);

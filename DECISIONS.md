@@ -97,3 +97,36 @@ Decision: separate page how-to/index.html, copying the tinker site's How to patt
 
 ## 2026-11-08 (new session) — No live address on the How to page
 Decision: remove the 'Live address' chip from step 5. Reason: teacher asked to drop it entirely (corrects the earlier 'Coming soon' placeholder).
+
+## 2026-11-10 — Merging for speed may change the desktop view slightly
+Decision: merging small same-material objects applies to desktop and headset alike; small look changes are OK (teacher). VR-only settings (fewer grass blades, no shadows/antialias, far culling) stay off on desktop. Keyboard/mouse unchanged. Reason: Quest 2 needs far fewer draw calls; desktop and slow school laptops also benefit. Before/after shots are still shown, and anything that looks wrong is not merged.
+
+## 2026-11-10 — Other device's version wins
+Decision: take the other device's how-to/index.html, .gitignore, .git and MEMORY.md (teacher approved overwriting MEMORY.md). Reason: it is newer (GitHub Pages deploy, tinker links, neutral How to wording). Local .claude/launch.json kept (it works here).
+
+## 2026-11-10 — Stage 1 headset card design (plan, not built)
+Decision (proposed): VR card = world-locked panel about 1 m ahead at the moment it opens (does not follow the head, less motion sickness); world dims; walking stops; rings hide while open. Open with A/X or laser + trigger on a ring when within 400 m; close with B/Y or laser + trigger on Close. Desktop view unchanged. Mini map and title box stay screen-only for now. Targets Quest 2, 3 and 3S (same browser and buttons).
+
+## 2026-11-10 — Language rule clarified
+Decision: only student-facing output is English (pages, cards, labels, buttons, How to). Notes for the teacher in plan images and chat are Korean. Reason: teacher clarified after first saying all work in English. Handoff files stay English.
+
+## 2026-11-10 — Model
+Decision: use Opus for the 3 Quest stages. Reason: scoped stages with a teacher approval at each step; Fable fits long autonomous work. Reconsider Fable only if stage 3 (performance) keeps failing.
+
+## 2026-11-10 — Stage 1 built as planned, with small additions
+Decision: build the approved plan in a separate file js/vr.js; hotspots.js only sends events and exposes 3 functions. Reason: keeps the desktop code path the same and easy to check. Additions not in the plan image: (1) the AR button is turned off (Quest 3/3S would show it; AR is not part of this project); (2) a ring grows while a laser points at it, because the visible laser line is short (3 m) and students need to see what they are pointing at; (3) A/X far from any place shows "Walk closer to a pink ring!". Correction to the plan image: the card help line reads "Point at Close and pull the trigger, or press B".
+
+## 2026-11-10 — Keep this folder's MEMORY.md over the other device's
+Decision: after fast-forwarding to GitHub, keep the local MEMORY.md and copy in the one new fact from the other device's version (stage 1 should include a controller guide page; open question whether it lists stick controls). Reason: the other device's MEMORY.md was written before stage 1 was built here, so it is older apart from that fact.
+
+## 2026-11-10 — Stage 2 design (proposed)
+Decision (proposed): snap turn (30 deg) instead of smooth turn, and a vignette while moving, because smooth turning and fast forward motion are the main causes of VR motion sickness for children. Walking speed starts equal to the keyboard (teacher-chosen), with a VR-only lower speed as the fallback. Recommend building stage 2 before pushing so the teacher can reach the places in the headset to test stage 1.
+
+## 2026-11-10 — Card opens and closes with A/X only (corrects the stage 1 design)
+Decision: A/X toggles the card; lasers, trigger and B/Y are not used. Reason: teacher — students only need to open the card, not point at rings; one button is simpler for grades 3-5. Replaces the 2026-11-10 stage 1 design (laser + trigger + B/Y).
+
+## 2026-11-10 — Joysticks copy the keyboard; no stick turning
+Decision: both thumbsticks = arrow keys (digital, same speed and feel as the keyboard); turning only by head/body. Reason: teacher wants the headset to work like the keyboard students already know, and either hand to work. Replaces the proposed proportional left-stick speed and the right-stick 30 deg snap turn.
+
+## 2026-11-10 — Stages 1 + 2 built as the revised plan; cache-busting
+Decision: build stage 2 together with the stage 1 revision (A/X only). Added ?v=20261110 to the four local script tags in world.html. Reason: while testing, the browser kept an old js/components.js from cache; GitHub Pages and the Quest browser cache files too, and a mix of old and new files would break walking. Change the version string whenever these files change.

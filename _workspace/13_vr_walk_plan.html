@@ -1,0 +1,77 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+ body{margin:0;width:1500px;background:#fbfaf6;font-family:"Malgun Gothic","Segoe UI",sans-serif;color:#222}
+ h1{font-size:27px;text-align:center;margin:16px 0 2px}
+ .s{text-align:center;font-size:15px;color:#555;margin-bottom:12px}
+ .g{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin:0 22px}
+ figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px;position:relative}
+ .shot{position:relative;border-radius:6px;overflow:hidden}
+ .shot img{width:100%;display:block}
+ .vig{position:absolute;inset:0;background:radial-gradient(ellipse 58% 62% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.78) 100%)}
+ .shot svg{position:absolute;inset:0;width:100%;height:100%}
+ figcaption{font-size:17px;font-weight:700;margin:8px 4px 2px;color:#2e7d32}
+ .n{font-size:15px;font-weight:400;color:#444;line-height:1.55}
+ .row{display:grid;grid-template-columns:560px 1fr;gap:16px;margin:16px 22px 18px}
+ .box{background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px 16px;font-size:15px;line-height:1.65}
+ .box h3{margin:0 0 6px;font-size:18px}
+ table{border-collapse:collapse;width:100%;margin-top:6px}
+ td{padding:5px 6px;border-bottom:1px solid #eee;vertical-align:top}
+ td:first-child{font-weight:700;white-space:nowrap;width:170px}
+ .k{display:inline-block;min-width:26px;text-align:center;border:2px solid #333;border-radius:50%;font-weight:800;font-size:13px;padding:1px 5px;margin-right:4px;background:#fff}
+ .ask{background:#fff6d6;border-left:6px solid #e0a800;padding:6px 10px;border-radius:6px;margin-top:8px}
+</style></head><body>
+<h1>2단계 시안 (수정 2): 조이스틱 = 키보드 ↑↓←→ · 둘러보기는 고개로 · 카드는 A/X (Quest 2 / 3 / 3S)</h1>
+<div class="s">실제 세계 화면 위에 움직임을 그려 넣은 시안 · 프로젝트 파일은 아직 바꾸지 않음</div>
+<div class="g">
+ <figure><div class="shot"><img src="13_vr_walk_view.jpg"><div class="vig"></div>
+  <svg viewBox="0 0 800 509">
+   <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#fff"/></marker></defs>
+   <path d="M400 470 L400 360" stroke="#fff" stroke-width="7" stroke-linecap="round" marker-end="url(#ah)" opacity=".9"/>
+   <rect x="275" y="476" width="250" height="28" rx="14" fill="rgba(0,0,0,.55)"/>
+   <text x="400" y="496" fill="#fff" font-size="16" font-weight="700" text-anchor="middle" font-family="Malgun Gothic">조이스틱을 위로 = 키보드 ↑</text>
+  </svg></div>
+  <figcaption>① 조이스틱 = 키보드 ↑↓←→ <span class="n">— 왼쪽·오른쪽 조이스틱 어느 것이든 엄지로 기울이면 키를 누른 것과 똑같이 움직임(같은 속도, 같은 출발·멈춤). 비스듬히 = 두 키를 함께 누른 것처럼 대각선. '앞'은 지금 보고 있는 쪽. 걷는 동안만 화면 가장자리가 어두워짐(멀미 줄이기)</span></figcaption></figure>
+ <figure>
+  <svg viewBox="0 0 560 330" style="width:100%;display:block;background:#eef6e8;border-radius:6px" font-family="Malgun Gothic">
+   <defs><marker id="a2" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" refX="7" refY="7" orient="auto"><path d="M0,0 L14,7 L0,14 z" fill="#d4006e"/></marker></defs>
+   <!-- two controllers, each with a joystick and 4 arrows -->
+   <g transform="translate(140 150)">
+    <circle r="78" fill="#f4f4f4" stroke="#555" stroke-width="3"/><circle r="24" fill="#555"/>
+    <g stroke="#d4006e" stroke-width="5" marker-end="url(#a2)"><line x1="0" y1="-30" x2="0" y2="-60"/><line x1="0" y1="30" x2="0" y2="60"/><line x1="-30" y1="0" x2="-60" y2="0"/><line x1="30" y1="0" x2="60" y2="0"/></g>
+    <text y="112" text-anchor="middle" font-size="17" font-weight="700">왼쪽 조이스틱</text>
+   </g>
+   <g transform="translate(420 150)">
+    <circle r="78" fill="#f4f4f4" stroke="#555" stroke-width="3"/><circle r="24" fill="#555"/>
+    <g stroke="#d4006e" stroke-width="5" marker-end="url(#a2)"><line x1="0" y1="-30" x2="0" y2="-60"/><line x1="0" y1="30" x2="0" y2="60"/><line x1="-30" y1="0" x2="-60" y2="0"/><line x1="30" y1="0" x2="60" y2="0"/></g>
+    <text y="112" text-anchor="middle" font-size="17" font-weight="700">오른쪽 조이스틱</text>
+   </g>
+   <text x="280" y="155" text-anchor="middle" font-size="22" font-weight="800" fill="#2e7d32">=</text>
+   <text x="280" y="34" text-anchor="middle" font-size="16" fill="#456">↑ 앞으로 · ↓ 뒤로 · ← 왼쪽 옆걸음 · → 오른쪽 옆걸음</text>
+  </svg>
+  <figcaption>② 둘 다 같은 일 · 돌기 버튼 없음 <span class="n">— 편한 손 하나만 써도 됨(왼손잡이도 OK). 위·아래·뒤를 보거나 방향을 바꿀 때는 고개와 몸을 돌림(헤드셋이 그대로 따라감). 30° 돌기는 뺌</span></figcaption></figure>
+</div>
+<div class="row">
+ <div class="box"><h3>컨트롤러 버튼 (전부 이것뿐)</h3>
+  <table>
+   <tr><td>왼쪽 또는 오른쪽 조이스틱</td><td>걷기: 키보드 ↑↓←→와 똑같이</td></tr>
+   <tr><td><span class="k">A</span>/<span class="k">X</span></td><td>한 번 = 카드 열기 (분홍 안내판이 보일 때)<br>또 한 번 = 카드 닫기</td></tr>
+   <tr><td>헤드셋 (고개·몸)</td><td>둘러보기: 위·아래·좌우·뒤</td></tr>
+   <tr><td style="color:#999">B/Y · 방아쇠 · 그립</td><td style="color:#999">쓰지 않음 (레이저도 없앰)</td></tr>
+  </table>
+  <div class="n" style="margin-top:10px"><b>1단계에서 함께 고칠 것</b><br>
+   · 분홍 안내판: <i>Read the message · press A or X</i><br>
+   · 카드 아래: Close 버튼 대신 <i>Press A or X again to close</i><br>
+   · 레이저·방아쇠로 고리 열기, B/Y 닫기 → 없앰</div>
+  <div class="n" style="margin-top:6px">이 표가 나중에 학생용 컨트롤러 안내 페이지(영어)의 내용이 됨</div>
+ </div>
+ <div class="box"><h3>바뀌는 것 / 그대로인 것</h3>
+  <b>헤드셋 안에서만</b><br>
+  · 두 조이스틱 모두 키보드 ↑↓←→처럼 걷기, 걷는 동안 가장자리 어둡게<br>
+  · 키보드와 같은 벽: 마당 밖이나 물건(쿠키, 신발, 화분…) 속으로 못 들어감. 카드가 열려 있으면 못 걸음<br>
+  · 헤드셋을 쓰면 컴퓨터에서 보던 방향 그대로 시작 (지금은 무조건 북쪽을 보게 됨)<br>
+  <b>그대로</b>: 컴퓨터 화면, 키보드 걷기 속도(acceleration 357.5), 장소 위치, 카드 글<br>
+  <b>확인 방법</b>: 컴퓨터에서 조이스틱 입력을 흉내 내 속도·벽을 키보드와 비교 → 1·2단계를 함께 GitHub에 올려 선생님이 Quest에서 한 번 확인
+  <div class="ask"><b>써 보고 정할 것: 헤드셋 속 속도</b> — 키보드와 같은 속도(약 65 m/s)도 헤드셋에서는 훨씬 빠르게 느껴질 수 있음. 어지러우면 헤드셋에서만 낮추기(숫자 하나만 바꾸면 됨)</div>
+ </div>
+</div>
+</body></html>

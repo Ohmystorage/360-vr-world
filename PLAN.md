@@ -85,3 +85,62 @@ The ant world will be the example for the 'Prompt a 360° World' card on tinker-
 
 ## 2026-11-08 (new session) — How to: Live address removed
 Step 5 Publish now has two chips: Vercel, VR headsets.
+
+## 2026-11-10 — Quest 2 plan (3 stages, plan image + approval each)
+1. Headset cards + controller use (trigger on the pink ring or a controller button opens the card inside VR).
+2. Thumbstick walking: left stick moves (same speed as keyboard, acceleration 357.5 untouched), right stick snap-turns 30 deg, same ant-walk collision.
+3. Lighter scene: measure first (start view ~1560 draw calls; Quest 2 target ~100-300), merge same-material small objects, VR-only lower quality (fewer grass blades, no shadows/antialias, far culling). Show before/after desktop shots from the same spot.
+
+## 2026-11-10 — Synced from the other device; stage 1 plan image
+- Restored the other device's work from Downloads (360-vr-world_2026-11-10.zip): how-to/index.html with neutral wording (no we/our, no greetings or exclamation marks), .gitignore, the git history (origin https://github.com/Ohmystorage/360-vr-world), and its MEMORY.md (GitHub Pages + tinker site links done).
+- Quest 2 / 3 / 3S work planned in 3 stages (see the earlier 2026-11-10 entry). Stage 1 plan image made from real renders with a test card: _workspace/11_vr_card_plan.png (source 11_vr_card_plan.html, views 11_vr_hint.png, 11_vr_card.png). Prototype: card drawn on a canvas texture, panel ~1 m in front of the camera, world dimmed behind it, pink "Read the message / press A or point and pull the trigger" label below the view. Not built into the project yet; waiting for the teacher's yes.
+- Time estimates given: stage 1 ~1-1.5 h, stage 2 ~1 h, stage 3 ~2.5-3.5 h (my work only; plus a 5-10 min Quest check by the teacher per stage).
+
+## 2026-11-10 — Quest stage 1 built: cards inside the headset
+Teacher said yes ("1단계 시작 해"). Built (I did it directly, small change):
+- New js/vr.js (loaded after js/hotspots.js). Only active in VR mode (enter-vr / exit-vr):
+  - Pink label "Read the message / press A or point and pull the trigger" as a child of the three.js camera (scene.camera), 1.2 m ahead, 0.42 m below; shows while antNearest() finds a place within 400 m and no card is open. Other short messages ("Walk closer to a pink ring!", "Walk closer to read this!") show there in grey for 2.5 s.
+  - Card panel: canvas texture (1024 px = 1 m wide, height from the text: title, problem, Why is it hard?, Words to know, design challenge, help line), entity #vr-card placed at the head position at open time, facing the view direction (yaw only), card 1 m ahead (a little farther if taller than 1.2 m). Dark see-through ball (radius 4 m, opacity 0.45) dims the world. Separate Close button entity (class vr-ui vr-close) with hover look (yellow ring, 1.08x). Hidden meshes get a no-op raycast so lasers pass through.
+  - Rings hide while a card is open (VR only); a ring grows 1.3x while a controller laser points at it (hover flag read in the hotspot tick).
+  - Controllers: world.html #rig gets #hand-left / #hand-right with laser-controls and raycaster (objects .hotspot, .vr-ui; far 6000; enabled only in VR). The visible line is cut to 3 m unless it hits something within 30 m (the ray itself still reaches the rings); the line draws on top of the card. A/X = read nearest (or "Walk closer..." if none), B/Y = close.
+- js/hotspots.js: sends events ant-card-open (detail = card), ant-card-close, ant-hint; exposes window.antNearest, antReadNearest, antCloseCard; hotspot tick multiplies scale by 1.3 when hover is set. Desktop behavior unchanged.
+- world.html: loads js/vr.js; a-scene gets xr-mode-ui="enterAREnabled: false" (Quest 3 / 3S would otherwise also offer an AR button); the two hand entities.
+- Checked in the browser on 8123 (server stopped afterwards) with simulated VR (vr-mode state + enter-vr event, emitted button/trigger events, a cursor added to the right hand): label shows near the cookie, laser hover grows the ring, trigger opens the card, Close hover + trigger closes, X/Y and A/B open/close, far from places A shows the grey hint, exit-vr hides everything and turns lasers off, desktop Enter/Escape still work, fresh desktop view has nothing new, console clean. All 3 cards fit (heights 1.04-1.29 m). Result image: _workspace/12_vr_card_result.png.
+- Found for stage 2: in VR A-Frame look-controls resets the camera entity to position 0 / rotation 0 and turns off matrixAutoUpdate, so the start yaw (45 deg) is lost and wasd-controls on #cam cannot move the view in VR. Stick walking must move #rig (and snap turn must rotate #rig, then ant-walk must accept a rotated rig).
+
+## 2026-11-10 — Synced with GitHub again
+GitHub had 3 new commits from the other device (MEMORY.md only: the teacher's Quest stages; stage 1 also names a controller guide page). Downloads/360-vr-world_light.zip is identical to GitHub main (plus old _other-device notes). Fast-forwarded this folder to 9702479; local uncommitted stage 1 work kept; local MEMORY.md kept (newer) with the controller guide page added as an open item.
+
+## 2026-11-10 — Quest stage 2 plan image (thumbstick walking)
+Teacher's feedback from the Quest (recorded on the other device): in VR you can only look around (no walking) and the cards are invisible. Stage 1 fixes the cards; stage 2 fixes walking. Recommended: build stage 2, then push stages 1 + 2 together so one Quest test covers both.
+Plan image: _workspace/13_vr_walk_plan.png (source 13_vr_walk_plan.html, view 13_vr_walk_view.jpg). Design:
+- Left stick walks in the pushed direction (forward = where the head looks, yaw only); speed proportional to tilt, top speed = keyboard top speed (~65 m/s); dead zone ~0.2.
+- Right stick left/right = snap turn 30 deg (once per push; release to turn again), turning around the head position.
+- Comfort vignette: edges darken only while moving.
+- In VR, move and turn #rig (A-Frame zeroes #cam and turns off its matrixAutoUpdate in VR). ant-walk must clamp #rig against YARD.solids and bounds in VR (same walls as keyboard). No walking while a card is open.
+- On enter-vr, rotate #rig so the view starts in the direction the computer view was facing (today VR always starts facing north).
+- Desktop unchanged (keyboard speed, positions, card text).
+- Open: VR speed may feel too fast; start equal to keyboard, lower in VR only if the teacher feels sick.
+
+## 2026-11-10 — Stage 2 plan revised (teacher)
+Teacher: open and close the card only with A/X (press once = open, again = close); no need to open the ring. Revised plan image _workspace/13_vr_walk_plan.png: controls are only left stick (walk), right stick (30 deg turn), A/X (toggle card). Stage 1 changes to make together with stage 2: remove controller lasers and trigger use (no laser-controls hands, no Close button entity, no ring hover), remove B/Y close; label text "Read the message / press A or X"; card help line "Press A or X again to close" instead of the Close button. The word "새로" (new in stage 2) was removed from the table because it confused the teacher.
+
+## 2026-11-10 — Stage 2 plan revised again (teacher)
+Teacher: either joystick (left or right) does the keyboard's 4 moves; no 30 deg snap turn; looking around and turning only with the headset (head and body). Revised plan image _workspace/13_vr_walk_plan.png:
+- Both thumbsticks act like the arrow keys / WASD: up = forward, down = back, left/right = side-step. Digital like keys (same top speed, same acceleration and easing as wasd-controls), diagonal = two keys. Forward = where the head looks (yaw). Dead zone ~0.5 so a light touch does nothing.
+- No snap turn, no smooth turn. Vignette while walking (kept).
+- A/X toggles the card; B/Y, trigger, grip unused; no lasers.
+- In VR move #rig (cam is frozen by A-Frame); same walls via ant-walk; no walking while a card is open; start facing the computer view's direction.
+
+## 2026-11-10 — Quest stages 1 (revised) + 2 built
+Teacher said "네, 만들어줘" to the revised plan _workspace/13_vr_walk_plan.png. Built:
+- js/vr.js rewritten (stage 1 revised + stage 2):
+  - A or X toggles the card (nearest place within 400 m; far away shows "Walk closer to a pink ring!"). No lasers, no trigger, no B/Y, no Close button entity; card panel is a plain three.js group (dim ball + canvas card) added to the scene; card bottom shows a blue pill "Press A or X again to close". Label: "Read the message / press A or X".
+  - System vr-walk: either thumbstick acts as arrow keys (dead zone 0.5; up forward, down back, left/right side-step; diagonal = two keys). Same physics as wasd-controls (acceleration read from #cam's wasd-controls = 357.5, easing 1.1, 0.2 s max delta). Direction = head world yaw. Moves #rig. Reads live gamepad axes (tracked-controls) with thumbstickmoved events as fallback. No walking while a card is open.
+  - Vignette: head-locked plane (2.2 m at 0.5 m) with a radial gradient (clear to 18%, dark 0.85 from 55%), fades in/out over ~0.2 s while walking.
+  - enter-vr: #rig rotation.y = look-controls yaw, so the headset starts facing the computer view's direction; exit-vr: rig rotation back to 0.
+- js/components.js ant-walk: in VR clamps #rig (A-Frame freezes #cam in VR); on the computer clamps #cam as before.
+- js/hotspots.js: ring hover removed (no lasers); events and window.antNearest / antReadNearest / antCloseCard kept.
+- world.html: hands are plain meta-touch-controls entities (no laser-controls); script tags get ?v=20261110 so browsers (and the Quest) load the new files instead of cached ones.
+- Checks on 8123 (stopped) with simulated VR (checkHeadsetConnected forced true, vr-mode state, enter-vr, emitted thumbstick/button events, scene.tick loops): joystick distance = keyboard distance (65.5 m for 1 s held + coast); directions right (facing west: up -> west, down -> east, left -> south); light touch 0.3 does nothing; right stick works the same; stops at the cookie at x -465 like the keyboard and at the yard edge; card toggles with A then X; B/Y/trigger/grip do nothing; no walking with the card open; exit-vr resets the rig; desktop keyboard, Read button, Enter/Escape unchanged; console clean. Result image _workspace/14_vr_walk_result.png.
+- Not checked: a real Quest (WebXR head pose, controller models, real gamepad axes, comfort of the speed).

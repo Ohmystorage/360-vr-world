@@ -26,3 +26,10 @@
 - 2026-11-08: How to page built (mockup _workspace/10_howto_plan.png approved): how-to/index.html + how-to/shots/step1-5.png (fresh renders of the current world for steps 2, 4, 5). Checked on 8123 at 1280x760: all 5 steps open with pictures, chips switch text, Esc closes, 5/5 message, console clean. Waiting for teacher.
 - 2026-11-08: How to step 5: 'Live address' chip removed (teacher). Checked on 8123. Waiting for teacher.
 - 2026-11-08: Teacher approved the How to page.
+- 2026-11-10: Synced from the other device (how-to wording, .git, .gitignore, MEMORY.md). Quest 2/3/3S plan: 3 stages. Stage 1 plan image _workspace/11_vr_card_plan.png sent (English). Waiting for teacher's yes to build stage 1.
+- 2026-11-10: Quest stage 1 built (js/vr.js, small hooks in js/hotspots.js and world.html). Simulated VR checks pass; desktop unchanged. Result image _workspace/12_vr_card_result.png. Not yet tried on a real Quest. Waiting for teacher.
+- 2026-11-10: Synced with GitHub (other device: MEMORY.md-only commits). Open: controller guide page for stage 1. Waiting for teacher.
+- 2026-11-10: Stage 2 plan image _workspace/13_vr_walk_plan.png sent. Waiting for teacher's yes.
+- 2026-11-10: Stage 2 plan revised: A/X toggles the card, no laser/trigger/B/Y (also changes stage 1). Waiting for teacher's yes.
+- 2026-11-10: Stage 2 plan revised (both joysticks = keyboard 4 moves, no snap turn, look with head). Waiting for teacher's yes.
+- 2026-11-10: Quest stages 1 (revised: A/X only) + 2 (joystick walking) built. Simulated VR checks pass; desktop unchanged. Result image _workspace/14_vr_walk_result.png. Not pushed; not tried on a real Quest. Waiting for teacher.
