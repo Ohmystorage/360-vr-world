@@ -1,6 +1,6 @@
 # MEMORY.md — current snapshot (overwrite each time)
 
-Last updated: 2026-11-11 (synced to GitHub d8084d4; Quest fixes live; waiting for the teacher's Quest test)
+Last updated: 2026-11-11 (Quest fixes live; controller guide built locally, NOT pushed; waiting for the teacher's Quest test)
 
 ## Done
 - 3-place test version (stages 0-5 approved, QA PASS `_workspace/05_qa-tester_report.md`):
@@ -42,13 +42,14 @@ Last updated: 2026-11-11 (synced to GitHub d8084d4; Quest fixes live; waiting fo
   - Script tags `?v=2026111101`.
 
 ## In progress
+- Controller guide built in `js/vr.js` (uncommitted, not pushed): "? Controls" button left of Exit VR opens a guide panel in the headset (plan `_workspace/22_controls_plan.png`, result `_workspace/23_controls_result.jpg`, script tags `?v=2026111102`). Simulated-VR checks passed; the teacher wants to test it on the Quest together with commit 63ec929's fixes, so it must be pushed first (GitHub Pages).
 - Waiting for the teacher to test the fixes (commit 63ec929) on the Quest.
 - Nothing uncommitted from the other device. This folder was fast-forwarded to d8084d4 on 2026-11-11 (the local preview on port 8130 was stopped)..
 
 ## Next
 1. Get the Quest test feedback. Ask about: line direction vs the hand, trigger, Exit button placement (top right; move with one number if it is too far in or out), blink comfort, card distance/zoom, speed.
-2. Controller guide page for students (English). Plan image first.
-   - Content: left joystick = walk like arrow keys; right joystick = turn 30 deg (left/right) and zoom the card (up/down); point the line + trigger = open / Close / the VR button at the top right (exit); A/X = open/close the card; look around with your head.
+2. Controller guide: DONE locally (see In progress); push when asked, then collect Quest feedback on it too.
+   - Content (as built): left joystick = walk like arrow keys; right joystick = turn 30 deg (left/right) and zoom the card (up/down); point the line + trigger = open / Close / the VR button at the top right (exit); A/X = open/close the card; look around with your head.
 3. Stage 3: lighter scene for the Quest.
    - Measure first: start view ~1560 draw calls; Quest 2 target ~100-300.
    - Merge same-material small objects; VR-only lower quality.
@@ -90,6 +91,6 @@ Last updated: 2026-11-11 (synced to GitHub d8084d4; Quest fixes live; waiting fo
 ```
 Goal: make the Ant's-Eye World (A-Frame, grades 3-5) work well inside Meta Quest 2/3/3S; the 5 fixes from the first Quest test (pointer line + trigger, card zoom, 30 deg turns with blink, "Exit VR" button at the top right, 70% speed) are pushed and live on GitHub Pages (commit 63ec929).
 Read first: MEMORY.md, PLAN.md and DECISIONS.md (latest 2026-11-10 entries), CLAUDE.md, _workspace/status.md, _workspace/15_vr_fix_plan.png, _workspace/16_vr_fix_result.png, _workspace/18_exit_result.png, world.html, js/vr.js, js/components.js (ant-walk), js/hotspots.js, .claude/skills/ant-world-orchestrator/SKILL.md.
-First task: run git fetch/status (another device may have pushed), then ask the teacher (in Korean) how the Quest test of commit 63ec929 went; next: controller guide page plan image, then stage 3 (performance).
+First task: run git fetch/status (another device may have pushed), then ask the teacher (in Korean) how the Quest test went (commit 63ec929 fixes + the new "? Controls" guide if it was pushed); next: stage 3 (performance).
 Cautions: (1) plan image first and the teacher's yes after every stage; student-facing text in English, notes and chat in Korean; (2) keep keyboard speed 357.5 and js/problems.js text; bump ?v= on world.html script tags when JS changes; commit/push only when asked (never the zips or .claude/launch.json); stop any test server you start (port 8123 is the teacher's preview).
 ```

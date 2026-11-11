@@ -8,6 +8,7 @@
      left/right = side-step) with the keyboard's feel (same easing) at 70% of its speed. The edges darken while walking.
    - Turning: the RIGHT joystick left/right turns 30 degrees once per push, with a short dark blink (less sickness).
    - Exit VR: a white-bordered "Exit VR" button always at the top right of the view.
+   - "? Controls": a button left of Exit VR opens a controller guide panel (same panel style as a card); Close or A/X closes it.
    Walls: js/components.js (ant-walk) keeps the rig in the yard and out of solid things in VR too.
    Uses window.antNearest / antReadNearest / antCloseCard and the "ant-card-open/close" and "ant-hint" events from
    js/hotspots.js. */
@@ -25,10 +26,11 @@
     right: { origin: { x: -0.0065, y: -0.0186, z: -0.05 }, direction: { x: -0.124, y: -0.594, z: -0.795 } }
   };
   var scene, label, labelTex = {}, card, cardMesh, closeGlow, closeRect = null, cardH = 1024;
-  var cardDist = DIST, cardMax = ZOOM_MAX, vignette, blackout, exitBtn, exitTex = {}, ringGlow, hands = [];
+  var cardDist = DIST, cardMax = ZOOM_MAX, vignette, blackout, exitBtn, ctlBtn, guide = false, exitTex = {}, ringGlow, hands = [];
   var open = null, hintUntil = 0;
 
   function vr() { return !!scene && scene.is("vr-mode"); }
+  function busy() { return !!(open || guide); }   // a card or the controller guide is on screen
 
   // ---- canvas helpers ----
   function rr(c, x, y, w, h, r) {
@@ -87,7 +89,7 @@
     label.visible = true;
   }
   function showHint(text) {
-    if (!vr() || open || !label) return;
+    if (!vr() || busy() || !label) return;
     showLabel(text);
     hintUntil = performance.now() + 2500;
   }
@@ -149,11 +151,73 @@
     return { tex: texture(cv), h: cv.height };
   }
 
+  // ---- controller guide panel ("? Controls" button): two controller drawings with numbers, and a list ----
+  var BODY = { left: "M70 60 Q60 140 90 185 Q120 205 160 185 Q200 140 190 70 Q170 30 120 35 Q85 35 70 60Z",
+               right: "M230 60 Q240 140 210 185 Q180 205 140 185 Q100 140 110 70 Q130 30 180 35 Q215 35 230 60Z" };
+  var BADGES = {   // [number, badge x, badge y, line from x,y to x,y] in the drawing's 300 x 200 space
+    left: [[1, 35, 85, 49, 90, 83, 95], [4, 240, 75, 226, 75, 211, 72], [5, 70, 180, 84, 172, 118, 158]],
+    right: [[2, 265, 80, 251, 84, 221, 92], [3, 265, 120, 251, 116, 219, 102], [4, 60, 75, 74, 75, 90, 72], [5, 230, 180, 216, 174, 182, 158]]
+  };
+  function disc(c, x, y, r, fill, stroke) {
+    c.beginPath(); c.arc(x, y, r, 0, 7); c.fillStyle = fill; c.fill();
+    if (stroke) { c.strokeStyle = stroke; c.lineWidth = 3; c.stroke(); }
+  }
+  function drawPad(c, ox, oy, side) {
+    var R = side === "right", sx = R ? 195 : 105;
+    c.save(); c.translate(ox, oy); c.scale(1.5, 1.5);
+    var body = new Path2D(BODY[side]);
+    c.fillStyle = "#3a3a44"; c.strokeStyle = "#111"; c.lineWidth = 3; c.fill(body); c.stroke(body);
+    disc(c, sx, 95, 22, "#888", "#111"); disc(c, sx, 95, 11, "#bbb");
+    c.fillStyle = "#555"; c.fillRect(R ? 90 : 170, 60, 40, 20); c.strokeRect(R ? 90 : 170, 60, 40, 20);
+    c.font = "bold 11px Arial"; c.textAlign = "center"; c.textBaseline = "middle";
+    [[150, 140, R ? "B" : "Y"], [R ? 175 : 125, 155, R ? "A" : "X"]].forEach(function (b) {
+      disc(c, b[0], b[1], 9, "#ddd"); c.fillStyle = "#222"; c.fillText(b[2], b[0], b[1] + 1);
+    });
+    BADGES[side].forEach(function (b) {
+      c.strokeStyle = PINK; c.lineWidth = 3; c.beginPath(); c.moveTo(b[3], b[4]); c.lineTo(b[5], b[6]); c.stroke();
+      disc(c, b[1], b[2], 14, PINK); c.fillStyle = "#fff"; c.font = "bold 16px Arial"; c.fillText(b[0], b[1], b[2] + 1);
+    });
+    c.restore();
+  }
+  function guideTexture() {
+    var W = 1024, H = 1114, cv = canvas(W, H), c = cv.getContext("2d");
+    c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 30;
+    c.fillStyle = "#fffdf6"; rr(c, 20, 20, 984, H - 40, 40); c.fill();
+    c.shadowBlur = 0;
+    c.fillStyle = PINK; rr(c, 20, 20, 984, 22, 11); c.fill();
+    c.textAlign = "left"; c.fillStyle = "#1a1a1a";
+    fit(c, "How to use your controllers", 60, 884); c.fillText("How to use your controllers", 70, 124);
+    drawPad(c, 62, 150, "left"); drawPad(c, 512, 150, "right");
+    c.textAlign = "center"; c.textBaseline = "alphabetic"; c.fillStyle = "#444"; c.font = "bold 34px Arial";
+    c.fillText("LEFT", 287, 495); c.fillText("RIGHT", 737, 495);
+    c.textAlign = "left";
+    var rows = [["1", "Walk", " — left stick"], ["2", "Turn", " — right stick ← →"],
+      ["3", "Card closer / farther", " — right stick ↑ ↓"], ["4", "Point + trigger", " — press rings and buttons"],
+      ["5", "Open / close a card", " — A or X"], ["eye", "Look around", " — turn your head"]];
+    rows.forEach(function (r, i) {
+      var y = 560 + i * 62;
+      if (i < 5) { disc(c, 90, y - 13, 22, PINK); c.fillStyle = "#fff"; c.font = "bold 28px Arial"; c.textAlign = "center"; c.fillText(r[0], 90, y - 3); }
+      else {   // a small drawn eye (emoji fonts are not on every browser)
+        c.strokeStyle = PINK; c.lineWidth = 5; c.beginPath(); c.ellipse(90, y - 13, 24, 14, 0, 0, 7); c.stroke();
+        disc(c, 90, y - 13, 8, PINK);
+      }
+      c.textAlign = "left"; c.fillStyle = "#1a1a1a"; c.font = "bold 38px Arial"; c.fillText(r[1], 130, y);
+      var bw = c.measureText(r[1]).width;
+      c.font = "38px Arial"; c.fillStyle = "#333"; c.fillText(r[2], 130 + bw, y);
+    });
+    var by = 920;
+    closeRect = { x: W / 2 - 330, y: by, w: 660, h: 92 };
+    c.fillStyle = "#1f5fbf"; rr(c, closeRect.x, by, 660, 92, 46); c.fill();
+    c.fillStyle = "#fff"; c.font = "bold 50px Arial"; c.textAlign = "center"; c.fillText("Close", W / 2, by + 64);
+    c.fillStyle = "#666"; c.font = "34px Arial"; c.fillText("or press A or X", W / 2, by + 144);
+    return { tex: texture(cv), h: H };
+  }
+
   function hotspotsVisible(on) {
     document.querySelectorAll(".hotspot").forEach(function (e) { e.object3D.visible = on; });
   }
   function showCard(data) {
-    var t = cardTexture(data), h = t.h / 1024;
+    var t = data.guide ? guideTexture() : cardTexture(data), h = t.h / 1024;
     cardH = t.h;
     cardDist = DIST + Math.max(0, h - 1.2) * 0.8;     // a tall card starts a bit farther
     cardMax = Math.max(ZOOM_MAX, cardDist);
@@ -187,30 +251,41 @@
   // ---- A / X: open the nearest card, or close the open one ----
   function toggleCard() {
     if (!vr()) return;
-    if (open) window.antCloseCard();
+    if (guide) closeGuide();
+    else if (open) window.antCloseCard();
     else if (window.antNearest()) window.antReadNearest();
     else showHint("Walk closer to a pink ring!");
+  }
+
+  function closeGuide() { guide = false; hideCard(); }
+  function toggleGuide() {
+    if (!vr()) return;
+    if (guide) { closeGuide(); return; }
+    if (open) window.antCloseCard();
+    guide = true; showCard({ guide: true });
   }
 
   // ---- trigger: press what the hand's line points at ----
   function press(h) {
     if (!vr()) return;
     if (h.target === "exit") scene.exitVR();
-    else if (h.target === "close") window.antCloseCard();
+    else if (h.target === "ctl") toggleGuide();
+    else if (h.target === "close") { if (guide) closeGuide(); else window.antCloseCard(); }
     else if (h.target === "ring") window.antReadNearest();
   }
 
   // ---- textures for the Exit VR button, the Close outline, the ring glow and the line's end dot ----
   // Exit button (teacher, plan _workspace/20_exit_text_plan.png): "Exit VR" in bold white, white border,
   // see-through black (pink #ef2d5e when a line points at it). 160 x 56 button drawn at 4x.
-  function exitTexture(hover) {
-    var key = hover ? "hover" : "normal";
+  function exitTexture(hover) { return btnTexture("Exit VR", 160, hover); }
+  function btnTexture(text, w, hover) {
+    var key = text + (hover ? "+" : "");
     if (exitTex[key]) return exitTex[key];
-    var S = 4, cv = canvas(160 * S, 56 * S), c = cv.getContext("2d"), b = 3 * S;
+    var S = 4, cv = canvas(w * S, 56 * S), c = cv.getContext("2d"), b = 3 * S;
     c.fillStyle = hover ? "#ef2d5e" : "rgba(0,0,0,0.45)"; rr(c, b / 2, b / 2, cv.width - b, cv.height - b, 12 * S); c.fill();
     c.strokeStyle = "#fff"; c.lineWidth = b; rr(c, b / 2, b / 2, cv.width - b, cv.height - b, 12 * S); c.stroke();
     c.fillStyle = "#fff"; c.font = "bold " + 26 * S + "px Arial"; c.textAlign = "center"; c.textBaseline = "middle";
-    c.fillText("Exit VR", cv.width / 2, cv.height / 2 + S);
+    c.fillText(text, cv.width / 2, cv.height / 2 + S);
     return (exitTex[key] = texture(cv));
   }
   function outlineTexture() {
@@ -278,6 +353,13 @@
     exitBtn.visible = false;
     scene.camera.add(exitBtn);
 
+    // ? Controls: just left of Exit VR (0.30 m wide, 0.03 m gap)
+    ctlBtn = new THREE.Mesh(new THREE.PlaneGeometry(0.30, 0.084), panelMat(btnTexture("? Controls", 200, false)));
+    ctlBtn.position.set(0.46, 0.64, -1.0);
+    ctlBtn.renderOrder = 14;
+    ctlBtn.visible = false;
+    scene.camera.add(ctlBtn);
+
     // vignette: dark screen edges while walking (also follows the head)
     var cv = canvas(256, 256), c = cv.getContext("2d");
     var g = c.createRadialGradient(128, 128, 0, 128, 128, 128);
@@ -337,13 +419,14 @@
     scene.addEventListener("exit-vr", function () {
       document.getElementById("rig").object3D.rotation.y = 0;   // the computer view turns the camera, not the rig
       showLabel(null);
-      vignette.visible = blackout.visible = exitBtn.visible = ringGlow.visible = false;
+      vignette.visible = blackout.visible = exitBtn.visible = ctlBtn.visible = ringGlow.visible = false;
+      guide = false;
       hands.forEach(hideRay);
       hideCard();
     });
   }
 
-  document.addEventListener("ant-card-open", function (e) { open = e.detail; if (vr() && card) showCard(open); });
+  document.addEventListener("ant-card-open", function (e) { guide = false; open = e.detail; if (vr() && card) showCard(open); });
   document.addEventListener("ant-card-close", function () { open = null; hideCard(); });
   document.addEventListener("ant-hint", function (e) { showHint(e.detail); });
 
@@ -353,7 +436,7 @@
     tick: function (t) {
       if (t < this.next || !label) return;
       this.next = t + 100;
-      if (!vr() || open) { if (label.visible) showLabel(null); return; }
+      if (!vr() || busy()) { if (label.visible) showLabel(null); return; }
       if (performance.now() < hintUntil) return;
       showLabel(window.antNearest() ? "read" : null);
     }
@@ -368,9 +451,9 @@
     },
     tick: function () {
       if (!exitBtn) return;
-      if (!vr()) { if (exitBtn.visible) { exitBtn.visible = ringGlow.visible = false; hands.forEach(hideRay); } return; }
-      exitBtn.visible = true;
-      var self = this, near = !open && window.antNearest(), ring = null, onRing = false, onExit = false, onClose = false;
+      if (!vr()) { if (exitBtn.visible) { exitBtn.visible = ctlBtn.visible = ringGlow.visible = false; hands.forEach(hideRay); } return; }
+      exitBtn.visible = ctlBtn.visible = true;
+      var self = this, near = !busy() && window.antNearest(), ring = null, onRing = false, onExit = false, onCtl = false, onClose = false;
       if (near) document.querySelectorAll(".hotspot").forEach(function (el) {
         if (el.getAttribute("hotspot").id === near) ring = el;
       });
@@ -386,7 +469,8 @@
         d.set(0, 0, -1).applyQuaternion(h.anchor.getWorldQuaternion(self.q));
         rc.set(o, d);
         if ((x = rc.intersectObject(exitBtn, false)[0])) { h.target = "exit"; onExit = true; len = x.distance; }
-        else if (open) {
+        else if ((x = rc.intersectObject(ctlBtn, false)[0])) { h.target = "ctl"; onCtl = true; len = x.distance; }
+        else if (busy()) {
           len = cardDist;
           if ((x = rc.intersectObject(cardMesh, false)[0])) {
             len = x.distance;
@@ -407,6 +491,7 @@
         h.line.visible = h.dot.visible = true;
       });
       setMap(exitBtn, exitTexture(onExit));
+      setMap(ctlBtn, btnTexture("? Controls", 200, onCtl));
       closeGlow.visible = onClose;
       ringGlow.visible = onRing;
       if (onRing) {
@@ -455,7 +540,7 @@
 
       // right joystick
       var rs = this.stick("hand-right");
-      if (open) {
+      if (busy()) {
         this.armed = false;
         if (Math.abs(rs.y) > 0.2) {   // up = closer (zoom in), down = farther (zoom out)
           cardDist = Math.min(cardMax, Math.max(ZOOM_MIN, cardDist + rs.y * ZOOM_SPEED * dt));
@@ -478,7 +563,7 @@
       v.x *= ease; v.z *= ease;
       if (Math.abs(v.x) < 0.00001) v.x = 0;
       if (Math.abs(v.z) < 0.00001) v.z = 0;
-      if (!open) {
+      if (!busy()) {
         var acc = document.getElementById("cam").getAttribute("wasd-controls").acceleration * VR_SPEED;
         var s = this.stick("hand-left");
         if (s.x < -DEAD) v.x -= acc * dt;

@@ -173,3 +173,9 @@ Commit 63ec929 pushed to main (author Ohmystorage; zips and .claude/launch.json 
 
 ## 2026-11-11 — Synced again; local preview
 Fetched GitHub: 3 commits from the other device (05fb0b3 cards in the headset + joystick walking, 63ec929 the 5 Quest fixes, d8084d4 handoff notes); fast-forwarded this folder to d8084d4 (nothing local to merge). Ran a local preview on port 8130 (`python3 -m http.server 8130`): the intro page loads; the headset parts only show in a Quest. Earlier this session: GitHub repo + Pages + tinker site buttons + CLI deploy (see DECISIONS 2026-11-11). Two zips were made in Downloads for moving between devices (`360-vr-world_full.zip` with .git, `360-vr-world_light.zip` without .git); never commit them.
+
+## 2026-11-11 — Controller guide inside the headset (built, not yet tested on a Quest)
+- Teacher chose: guide must be seen INSIDE the headset (not a separate web page), opened by a button only (no auto-popup). Plan image `_workspace/22_controls_plan.png`; result `_workspace/23_controls_result.jpg`.
+- `js/vr.js`: "? Controls" button left of "Exit VR" (top right, always visible in VR). Point + trigger opens a guide panel in the card style (1.6 m ahead, world dimmed, walking stopped): two drawn controllers with numbers 1-5 and a 6-line list (walk, turn, card closer/farther, point + trigger, A/X, look around). Close button, A/X, or the ? button again closes it. Opening a problem card closes the guide and the other way round.
+- `world.html` script tags now `?v=2026111102`.
+- Checked only with simulated VR on the computer (pointer ray onto the button, trigger, A, Close, toggle, walking blocked while open). Not checked: legibility and button reach on a real Quest.

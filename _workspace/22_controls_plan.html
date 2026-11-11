@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+ body{margin:0;width:1500px;background:#fbfaf6;font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#222}
+ h1{font-size:26px;text-align:center;margin:16px 0 2px}
+ .s{text-align:center;font-size:15px;color:#555;margin-bottom:12px}
+ .g{display:grid;grid-template-columns:900px 1fr;gap:18px;margin:0 22px 20px}
+ figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px}
+ .shot{position:relative;border-radius:6px;overflow:hidden;height:506px;background:url(11_vr_hint.png) center/cover}
+ .dim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+ .gp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:520px;background:#fffdf7;border-radius:12px;box-shadow:0 6px 24px #0008;border-top:5px solid #e0197d;padding:10px 16px 12px;font-family:"Trebuchet MS",Arial,sans-serif}
+ .gp h2{margin:0 0 4px;font-size:20px;color:#2a1a10}
+ .ctl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .ctl div{text-align:center;font-weight:700;font-size:11px}
+ .rows{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:12px;margin-top:2px}
+ .rows div{display:flex;gap:6px;align-items:flex-start;line-height:1.25}
+ .n{flex:none;width:17px;height:17px;border-radius:50%;background:#e0197d;color:#fff;font:800 11px Arial;display:grid;place-items:center}
+ .close{margin:8px auto 0;width:300px;height:32px;border-radius:99px;background:#1e5bd6;color:#fff;font:700 16px Arial;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff,0 0 0 6px #ff3d9a}
+ .sm{text-align:center;font-size:10px;color:#666;margin-top:3px}
+ .btn{position:absolute;height:34px;border-radius:9px;background:rgba(0,0,0,.55);border:2px solid #fff;color:#fff;font:700 13px Arial;display:flex;align-items:center;padding:0 10px}
+ figcaption{font-size:17px;font-weight:700;margin:8px 4px 2px;color:#2e7d32}
+ .nn{font-size:15px;font-weight:400;color:#444;line-height:1.55}
+ .box{background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px 16px;font-size:15px;line-height:1.65;margin-bottom:12px}
+ .box h3{margin:0 0 6px;font-size:18px}
+ .ask{background:#fff6d6;border-left:6px solid #e0a800}
+ li{margin-bottom:3px}
+</style></head><body>
+<h1>컨트롤러 안내판 시안: 헤드셋 안에서 보이는 안내 카드</h1>
+<div class="s">실제 월드 화면 위에 바뀔 모습을 그려 넣은 시안 (글은 영어) · 프로젝트 파일은 아직 바꾸지 않음</div>
+<div class="g">
+ <div>
+ <figure><div class="shot"><div class="dim"></div>
+  <div class="gp"><h2>How to use your controllers</h2>
+   <div class="ctl">
+    <div><svg viewBox="0 0 300 200" width="100%"><path d="M70 60 Q60 140 90 185 Q120 205 160 185 Q200 140 190 70 Q170 30 120 35 Q85 35 70 60Z" fill="#3a3a44" stroke="#111" stroke-width="3"/>
+     <circle cx="105" cy="95" r="22" fill="#888" stroke="#111" stroke-width="3"/><circle cx="105" cy="95" r="11" fill="#bbb"/>
+     <circle cx="150" cy="140" r="9" fill="#ddd"/><circle cx="125" cy="155" r="9" fill="#ddd"/>
+     <text x="150" y="144" font-size="11" text-anchor="middle" font-weight="700">Y</text><text x="125" y="159" font-size="11" text-anchor="middle" font-weight="700">X</text>
+     <rect x="170" y="60" width="40" height="20" rx="8" fill="#555" stroke="#111" stroke-width="2"/>
+     <g font-family="Arial" font-weight="800" font-size="15" fill="#fff"><circle cx="35" cy="85" r="14" fill="#e0197d"/><text x="35" y="91" text-anchor="middle">1</text>
+     <circle cx="240" cy="75" r="14" fill="#e0197d"/><text x="240" y="81" text-anchor="middle">4</text>
+     <circle cx="70" cy="180" r="14" fill="#e0197d"/><text x="70" y="186" text-anchor="middle">5</text></g>
+     <path d="M49 90 L83 95 M226 75 L211 72 M84 172 L118 158" stroke="#e0197d" stroke-width="3"/></svg>LEFT</div>
+    <div><svg viewBox="0 0 300 200" width="100%"><path d="M230 60 Q240 140 210 185 Q180 205 140 185 Q100 140 110 70 Q130 30 180 35 Q215 35 230 60Z" fill="#3a3a44" stroke="#111" stroke-width="3"/>
+     <circle cx="195" cy="95" r="22" fill="#888" stroke="#111" stroke-width="3"/><circle cx="195" cy="95" r="11" fill="#bbb"/>
+     <circle cx="150" cy="140" r="9" fill="#ddd"/><circle cx="175" cy="155" r="9" fill="#ddd"/>
+     <text x="150" y="144" font-size="11" text-anchor="middle" font-weight="700">B</text><text x="175" y="159" font-size="11" text-anchor="middle" font-weight="700">A</text>
+     <rect x="90" y="60" width="40" height="20" rx="8" fill="#555" stroke="#111" stroke-width="2"/>
+     <g font-family="Arial" font-weight="800" font-size="15" fill="#fff"><circle cx="265" cy="80" r="14" fill="#e0197d"/><text x="265" y="86" text-anchor="middle">2</text>
+     <circle cx="265" cy="120" r="14" fill="#e0197d"/><text x="265" y="126" text-anchor="middle">3</text>
+     <circle cx="60" cy="75" r="14" fill="#e0197d"/><text x="60" y="81" text-anchor="middle">4</text>
+     <circle cx="230" cy="180" r="14" fill="#e0197d"/><text x="230" y="186" text-anchor="middle">5</text></g>
+     <path d="M251 84 L221 92 M251 116 L219 102 M74 75 L90 72 M216 174 L182 158" stroke="#e0197d" stroke-width="3"/></svg>RIGHT</div>
+   </div>
+   <div class="rows">
+    <div><span class="n">1</span><span><b>Walk</b> — left stick</span></div>
+    <div><span class="n">2</span><span><b>Turn</b> — right stick ← →</span></div>
+    <div><span class="n">3</span><span><b>Card closer / farther</b> — right stick ↑ ↓</span></div>
+    <div><span class="n">4</span><span><b>Point and pull the trigger</b></span></div>
+    <div><span class="n">5</span><span><b>Open / close a card</b> — A or X</span></div>
+    <div><span class="n">👀</span><span><b>Look around</b> — turn your head</span></div>
+   </div>
+   <div class="close">Close</div><div class="sm">or press A or X</div>
+  </div>
+  <div class="btn" style="right:130px;top:16px">? Controls</div>
+  <div class="btn" style="right:16px;top:16px">🥽 Exit VR</div>
+ </div>
+ <figcaption>① 헤드셋을 쓰고 월드에 들어가면 자동으로 이 안내판이 눈앞에 뜸 <span class="nn">— 문제 카드와 같은 방식(1.6 m 앞, 월드는 어둡게). 다 읽으면 선으로 <b>Close</b>를 가리키고 트리거, 또는 A/X. 닫으면 걸을 수 있음. 이 안내판이 열려 있는 동안은 걷기가 멈춤.</span></figcaption></figure>
+ </div>
+ <div>
+  <div class="box"><h3>② 다시 보고 싶을 때</h3>
+   오른쪽 위 <b>Exit VR</b> 옆에 작은 버튼 <b>? Controls</b>가 항상 있음. 선으로 가리키고 트리거를 당기면 안내판이 다시 열림 (그림 오른쪽 위).</div>
+  <div class="box"><h3>들어가는 내용 (Quest에 이미 만들어진 것 그대로)</h3>
+   <ul style="margin:0;padding-left:20px"><li>1 왼쪽 스틱 = 걷기</li><li>2 오른쪽 스틱 좌우 = 30° 돌기</li><li>3 오른쪽 스틱 위아래 = 카드 가깝게/멀게</li><li>4 선 + 트리거 = 분홍 고리·Close·Exit VR 누르기</li><li>5 A 또는 X = 카드 열기/닫기</li><li>고개 = 둘러보기</li></ul>
+   컨트롤러 그림은 코드로 그린 단순한 모양 (실제 모양과 똑같지는 않음).</div>
+  <div class="box"><h3>바뀌는 파일</h3>
+   <b>js/vr.js</b> 만 고침 (카드 만드는 방식을 그대로 가져다 씀) + world.html의 ?v= 번호 올림. 컴퓨터 화면, 키보드 속도, 카드 글은 그대로.<br>
+   별도 웹페이지는 만들지 않음 (헤드셋 안에서 보는 것이 목적).</div>
+  <div class="box ask"><b>정할 것</b> — 처음 들어갈 때 <b>자동으로</b> 뜨게 할지, <b>? Controls 버튼만</b> 두고 학생이 직접 열게 할지. 시안은 자동 + 버튼 둘 다.</div>
+ </div>
+</div>
+</body></html>

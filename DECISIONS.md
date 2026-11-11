@@ -157,3 +157,9 @@ Decision: on tinker-with-ai.vercel.app the "Prompt a 360° World" card has Examp
 
 ## 2026-11-11 — Quest stage numbering and guide wording (teacher)
 Decision: the teacher calls the headset work "Quest stage 1 / 2 / 3" to avoid mixing with Stage 0-5: 1 = cards in the headset + controller (pointing, trigger, guide page), 2 = thumbstick walking, 3 = lighter scene. Recommended and agreed: the controller guide page lists what really works at that time and gets the walking lines added when walking exists (later the other device built both, so the guide now covers all controls). Performance stays last, after a real Quest test. Reason: a guide that lists unbuilt controls confuses students.
+
+## 2026-11-11 — Controller guide: inside the world, button only
+- Decision: the controller guide is a panel drawn in the 3D world (like the problem card), opened with a "? Controls" button next to Exit VR. No automatic popup at VR start. No separate web page.
+- Reason: the teacher said it must show in the virtual world; the information is needed after the headset is on. Button only because the teacher chose it (less in the way).
+- Reverses my first proposal (a separate `controls/` web page), which the teacher rejected as not visible in the headset.
+- Controller drawings are simple canvas shapes (no models); the "look around" row uses a drawn eye because emoji fonts are not on every browser.
