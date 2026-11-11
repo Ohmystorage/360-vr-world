@@ -3,7 +3,7 @@
    Clicking one (scene cursor="rayOrigin: mouse", raycaster objects .hotspot) opens the card from
    window.ANT_PROBLEMS. Rev 4: near a place, a big "Read the message" button (or Enter) opens it too.
    window.ANT_READ remembers opened cards; the minimap (components.js) draws check marks.
-   Quest: js/vr.js shows the same card inside the headset (A or X opens and closes it). It listens to the events
+   Quest: js/vr.js shows the same card inside the headset (pointer line + trigger, or A / X, opens and closes it). It listens to the events
    "ant-card-open", "ant-card-close" and "ant-hint" sent from here and uses window.antNearest / antReadNearest /
    antCloseCard. */
 (function () {

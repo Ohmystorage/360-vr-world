@@ -1,19 +1,31 @@
-/* Ant's-Eye World - Quest 2 / 3 / 3S (stages 1 + 2). Only active inside a headset (VR mode); the computer view
-   stays the same.
-   - Stage 1: screen boxes do not show in a headset, so the "Read the message" label and the problem card are drawn
-     as panels in the 3D world. A or X opens the card of the nearest place (same 400 m rule); A or X again closes it.
-   - Stage 2: either joystick works like the arrow keys (up = forward, down = back, left/right = side-step), with the
-     keyboard's speed and feel (same acceleration and easing as wasd-controls). Forward = where the head looks.
-     Looking around and turning: head and body only. The screen edges darken while walking (less motion sickness).
+/* Ant's-Eye World - Quest 2 / 3 / 3S. Only active inside a headset (VR mode); the computer view stays the same.
+   - Cards: screen boxes do not show in a headset, so the "Read the message" label and the problem card are drawn
+     as panels in the 3D world. The card opens 1.6 m ahead; the right joystick up/down moves it closer/farther.
+   - Pointer line: near a place, while a card is open, or when pointing at Exit VR, each controller shows a line.
+     Line on the pink ring + trigger = open the card; on Close + trigger = close it; on Exit VR + trigger = leave VR.
+     A or X still opens the nearest card and closes an open one.
+   - Walking: the LEFT joystick works like the arrow keys (up = forward where the head looks, down = back,
+     left/right = side-step) with the keyboard's feel (same easing) at 70% of its speed. The edges darken while walking.
+   - Turning: the RIGHT joystick left/right turns 30 degrees once per push, with a short dark blink (less sickness).
+   - Exit VR: a white-bordered "Exit VR" button always at the top right of the view.
    Walls: js/components.js (ant-walk) keeps the rig in the yard and out of solid things in VR too.
    Uses window.antNearest / antReadNearest / antCloseCard and the "ant-card-open/close" and "ant-hint" events from
    js/hotspots.js. */
 (function () {
   var PINK = "#e0186f";
-  var DIST = 1.0;        // card distance from the eyes in m
-  var DEAD = 0.5;        // a joystick must be tilted this far to count as a pressed arrow key
-  var EASING = 1.1;      // same as wasd-controls
-  var scene, label, labelTex = {}, card, cardMesh, vignette;
+  var DIST = 1.6;            // card distance from the eyes when it opens, in m (teacher: 1.0 was too close)
+  var ZOOM_MIN = 0.8, ZOOM_MAX = 3.0, ZOOM_SPEED = 1.0;   // right joystick up/down: card distance range (m), m/s
+  var DEAD = 0.5;            // the left joystick must be tilted this far to count as a pressed arrow key
+  var EASING = 1.1;          // same as wasd-controls
+  var VR_SPEED = 0.7;        // headset walking = 70% of the keyboard speed (teacher: 30% slower)
+  var TURN = Math.PI / 6;    // right joystick left/right: one 30 degree turn per push
+  var AIM = Math.cos(7 * Math.PI / 180);   // the line counts as pointing at a ring within 7 degrees (easy to hit)
+  var RAY = {                // controller line start and direction (Quest 2 controller; Quest 3 sends its own)
+    left: { origin: { x: 0.0065, y: -0.0186, z: -0.05 }, direction: { x: 0.124, y: -0.594, z: -0.795 } },
+    right: { origin: { x: -0.0065, y: -0.0186, z: -0.05 }, direction: { x: -0.124, y: -0.594, z: -0.795 } }
+  };
+  var scene, label, labelTex = {}, card, cardMesh, closeGlow, closeRect = null, cardH = 1024;
+  var cardDist = DIST, cardMax = ZOOM_MAX, vignette, blackout, exitBtn, exitTex = {}, ringGlow, hands = [];
   var open = null, hintUntil = 0;
 
   function vr() { return !!scene && scene.is("vr-mode"); }
@@ -35,6 +47,10 @@
     if (line) { if (draw) c.fillText(line, x, y); y += lh; }
     return y;
   }
+  function fit(c, text, size, max) {   // bold font no bigger than size that fits in max px
+    do { c.font = "bold " + size + "px Arial"; size -= 2; } while (c.measureText(text).width > max && size > 16);
+  }
+  function canvas(w, h) { var cv = document.createElement("canvas"); cv.width = w; cv.height = h; return cv; }
   function texture(cv) {
     var t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace;
@@ -46,19 +62,20 @@
     return new THREE.MeshBasicMaterial({ map: map || null, color: color === undefined ? 0xffffff : color, transparent: true,
       opacity: opacity === undefined ? 1 : opacity, depthTest: false, depthWrite: false, fog: false });
   }
+  function setMap(mesh, t) { if (mesh.material.map !== t) { mesh.material.map = t; mesh.material.needsUpdate = true; } }
 
   // ---- "Read the message" label (moves with the head, just below the middle of the view) ----
   function labelTexture(kind) {
     if (labelTex[kind]) return labelTex[kind];
-    var cv = document.createElement("canvas"), c = cv.getContext("2d");
-    cv.width = 1024; cv.height = 192;
+    var cv = canvas(1024, 192), c = cv.getContext("2d");
     c.fillStyle = kind === "read" ? "rgba(224,24,111,.95)" : "rgba(40,40,40,.88)";
     rr(c, 8, 8, 1008, 176, 88); c.fill();
     c.strokeStyle = "#fff"; c.lineWidth = 8; rr(c, 8, 8, 1008, 176, 88); c.stroke();
     c.fillStyle = "#fff"; c.textAlign = "center";
     if (kind === "read") {
-      c.font = "bold 62px Arial"; c.fillText("✉  Read the message", 512, 88);
-      c.font = "bold 44px Arial"; c.fillText("press A or X", 512, 150);
+      c.font = "bold 62px Arial"; c.fillText("✉  Read the message", 512, 86);
+      var how = "point at ✉ and pull the trigger · or press A / X";
+      fit(c, how, 42, 900); c.fillText(how, 512, 148);
     } else {
       c.font = "bold 58px Arial"; c.fillText(kind, 512, 116);
     }
@@ -66,8 +83,7 @@
   }
   function showLabel(kind) {
     if (!kind) { label.visible = false; return; }
-    var t = labelTexture(kind);
-    if (label.material.map !== t) { label.material.map = t; label.material.needsUpdate = true; }
+    setMap(label, labelTexture(kind));
     label.visible = true;
   }
   function showHint(text) {
@@ -109,19 +125,21 @@
       c.fillStyle = "#6b3200"; c.font = "bold 40px Arial"; c.fillText("Your design challenge", x + 34, top + 54);
       c.fillStyle = "#1a1a1a"; c.font = "bold 38px Arial"; wrap(c, data.question, x + 34, top + 104, w - 60, 46, true);
     }
-    // how to close: a blue pill (looks like the computer's Close button)
+    // Close button (point at it and pull the trigger), with the other ways written under it
     var by = top + bh + 40;
+    closeRect = { x: W / 2 - 330, y: by, w: 660, h: 92 };
     if (draw) {
-      c.fillStyle = "#1f5fbf"; rr(c, W / 2 - 330, by, 660, 92, 46); c.fill();
-      c.fillStyle = "#fff"; c.font = "bold 42px Arial"; c.textAlign = "center";
-      c.fillText("Press A or X again to close", W / 2, by + 60);
+      c.fillStyle = "#1f5fbf"; rr(c, closeRect.x, by, 660, 92, 46); c.fill();
+      c.fillStyle = "#fff"; c.font = "bold 50px Arial"; c.textAlign = "center";
+      c.fillText("Close", W / 2, by + 64);
+      c.fillStyle = "#666"; c.font = "34px Arial";
+      c.fillText("or press A or X   ·   right stick ↑ ↓ to zoom", W / 2, by + 144);
       c.textAlign = "left";
     }
-    return by + 92 + 60;
+    return by + 144 + 50;
   }
   function cardTexture(data) {
-    var cv = document.createElement("canvas"), c = cv.getContext("2d");
-    cv.width = 1024; cv.height = 8;
+    var cv = canvas(1024, 8), c = cv.getContext("2d");
     cv.height = Math.ceil(layoutCard(c, data, false));   // resizing clears the canvas and its settings
     c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 30;
     c.fillStyle = "#fffdf6"; rr(c, 20, 20, 984, cv.height - 40, 40); c.fill();
@@ -135,11 +153,18 @@
     document.querySelectorAll(".hotspot").forEach(function (e) { e.object3D.visible = on; });
   }
   function showCard(data) {
-    var t = cardTexture(data), h = t.h / 1024, dist = DIST + Math.max(0, h - 1.2) * 0.8;
+    var t = cardTexture(data), h = t.h / 1024;
+    cardH = t.h;
+    cardDist = DIST + Math.max(0, h - 1.2) * 0.8;     // a tall card starts a bit farther
+    cardMax = Math.max(ZOOM_MAX, cardDist);
     if (cardMesh.material.map) cardMesh.material.map.dispose();
-    cardMesh.material.map = t.tex; cardMesh.material.needsUpdate = true;
+    setMap(cardMesh, t.tex);
     cardMesh.scale.set(1, h, 1);
-    cardMesh.position.set(0, -0.05, -dist);
+    cardMesh.position.set(0, -0.05, -cardDist);
+    // pink outline over the Close button (a child of the card: undo the card's height scale)
+    closeGlow.scale.set(1, 1 / h, 1);
+    closeGlow.position.set((closeRect.x + closeRect.w / 2) / 1024 - 0.5, 0.5 - (closeRect.y + closeRect.h / 2) / t.h, 0);
+    closeGlow.visible = false;
     // in front of the eyes, level and facing the ant; it stays there (does not follow the head) until it closes
     var head = new THREE.Vector3(), dir = new THREE.Vector3();
     scene.camera.getWorldPosition(head); scene.camera.getWorldDirection(dir);
@@ -155,6 +180,7 @@
   function hideCard() {
     if (!card || !card.visible) return;
     card.visible = false;
+    closeGlow.visible = false;
     hotspotsVisible(true);
   }
 
@@ -166,6 +192,76 @@
     else showHint("Walk closer to a pink ring!");
   }
 
+  // ---- trigger: press what the hand's line points at ----
+  function press(h) {
+    if (!vr()) return;
+    if (h.target === "exit") scene.exitVR();
+    else if (h.target === "close") window.antCloseCard();
+    else if (h.target === "ring") window.antReadNearest();
+  }
+
+  // ---- textures for the Exit VR button, the Close outline, the ring glow and the line's end dot ----
+  // Exit button (teacher, plan _workspace/20_exit_text_plan.png): "Exit VR" in bold white, white border,
+  // see-through black (pink #ef2d5e when a line points at it). 160 x 56 button drawn at 4x.
+  function exitTexture(hover) {
+    var key = hover ? "hover" : "normal";
+    if (exitTex[key]) return exitTex[key];
+    var S = 4, cv = canvas(160 * S, 56 * S), c = cv.getContext("2d"), b = 3 * S;
+    c.fillStyle = hover ? "#ef2d5e" : "rgba(0,0,0,0.45)"; rr(c, b / 2, b / 2, cv.width - b, cv.height - b, 12 * S); c.fill();
+    c.strokeStyle = "#fff"; c.lineWidth = b; rr(c, b / 2, b / 2, cv.width - b, cv.height - b, 12 * S); c.stroke();
+    c.fillStyle = "#fff"; c.font = "bold " + 26 * S + "px Arial"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillText("Exit VR", cv.width / 2, cv.height / 2 + S);
+    return (exitTex[key] = texture(cv));
+  }
+  function outlineTexture() {
+    var cv = canvas(700, 130), c = cv.getContext("2d");
+    c.strokeStyle = "#fff"; c.lineWidth = 10; rr(c, 12, 12, 676, 106, 53); c.stroke();
+    c.strokeStyle = "#ff3d9a"; c.lineWidth = 12; rr(c, 4, 4, 692, 122, 61); c.stroke();
+    return texture(cv);
+  }
+  function glowTexture() {
+    var cv = canvas(256, 256), c = cv.getContext("2d"), g = c.createRadialGradient(128, 128, 0, 128, 128, 128);
+    g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.16, "rgba(255,255,255,1)");
+    g.addColorStop(0.24, "rgba(255,79,168,.95)"); g.addColorStop(0.6, "rgba(255,79,168,.35)");
+    g.addColorStop(1, "rgba(255,79,168,0)");
+    c.fillStyle = g; c.fillRect(0, 0, 256, 256);
+    return texture(cv);
+  }
+  function dotTexture() {
+    var cv = canvas(64, 64), c = cv.getContext("2d");
+    c.fillStyle = "#fff"; c.beginPath(); c.arc(32, 32, 22, 0, 7); c.fill();
+    c.strokeStyle = "#ff3d9a"; c.lineWidth = 8; c.stroke();
+    return texture(cv);
+  }
+
+  // ---- one pointer line per controller ----
+  function makeRay(hand, side, dot) {
+    var info = { el: hand, side: side, connected: false, target: null };
+    info.anchor = new THREE.Object3D();             // where the line starts, in the controller's own space
+    hand.object3D.add(info.anchor);
+    var geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 0, -1)]);
+    info.line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95,
+      depthTest: false, depthWrite: false, fog: false }));
+    info.line.renderOrder = 13;
+    info.line.frustumCulled = false;
+    info.dot = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, depthTest: false, depthWrite: false, fog: false }));
+    info.dot.renderOrder = 13;
+    info.line.visible = info.dot.visible = false;
+    scene.object3D.add(info.line); scene.object3D.add(info.dot);
+    function aim(ro) {
+      var d = ro.direction;
+      info.anchor.position.set(ro.origin.x, ro.origin.y, ro.origin.z);
+      info.anchor.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), new THREE.Vector3(d.x, d.y, d.z).normalize());
+    }
+    aim(RAY[side]);
+    hand.addEventListener("controllermodelready", function (e) { if (e.detail && e.detail.rayOrigin) aim(e.detail.rayOrigin); });
+    hand.addEventListener("controllerconnected", function () { info.connected = true; });
+    hand.addEventListener("controllerdisconnected", function () { info.connected = false; });
+    hand.addEventListener("triggerdown", function () { press(info); });
+    return info;
+  }
+  function hideRay(h) { h.line.visible = h.dot.visible = false; h.target = null; }
+
   // ---- set up once the scene is ready ----
   function build() {
     // label: a child of the three.js camera, so it moves with the head inside the headset
@@ -175,9 +271,15 @@
     label.visible = false;
     scene.camera.add(label);
 
+    // Exit VR: always at the top right of the view (about 37 deg right, 33 deg up; teacher wanted it higher and further right)
+    exitBtn = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.084), panelMat(exitTexture(false)));
+    exitBtn.position.set(0.76, 0.64, -1.0);
+    exitBtn.renderOrder = 14;
+    exitBtn.visible = false;
+    scene.camera.add(exitBtn);
+
     // vignette: dark screen edges while walking (also follows the head)
-    var cv = document.createElement("canvas"), c = cv.getContext("2d");
-    cv.width = cv.height = 256;
+    var cv = canvas(256, 256), c = cv.getContext("2d");
     var g = c.createRadialGradient(128, 128, 0, 128, 128, 128);
     // clear middle (about 20 degrees each way), getting darker out to about 50 degrees (the headset's edge)
     g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.18, "rgba(0,0,0,0)");
@@ -189,6 +291,13 @@
     vignette.visible = false;
     scene.camera.add(vignette);
 
+    // blink: the whole view goes dark for a moment during a 30 degree turn
+    blackout = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), panelMat(null, 0x000000, 0));
+    blackout.position.set(0, 0, -0.25);
+    blackout.renderOrder = 30;
+    blackout.visible = false;
+    scene.camera.add(blackout);
+
     // card: a dark see-through ball around the head dims the world, the card panel sits inside it
     card = new THREE.Group();
     var dim = new THREE.Mesh(new THREE.SphereGeometry(4, 24, 16), panelMat(null, 0x000000, 0.45));
@@ -196,15 +305,27 @@
     dim.renderOrder = 9;
     cardMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), panelMat(null));
     cardMesh.renderOrder = 10;
+    closeGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.13), panelMat(outlineTexture()));
+    closeGlow.renderOrder = 11;
+    closeGlow.visible = false;
+    cardMesh.add(closeGlow);
     card.add(dim); card.add(cardMesh);
     card.visible = false;
     scene.object3D.add(card);
 
+    // glow on the pink ring the line points at
+    ringGlow = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), panelMat(glowTexture()));
+    ringGlow.renderOrder = 12;
+    ringGlow.visible = false;
+    scene.object3D.add(ringGlow);
+
+    var dot = dotTexture();
     document.querySelectorAll(".vr-hand").forEach(function (hand) {
       hand.addEventListener("abuttondown", toggleCard);
       hand.addEventListener("xbuttondown", toggleCard);
       hand.stick = { x: 0, y: 0 };
       hand.addEventListener("thumbstickmoved", function (e) { hand.stick.x = e.detail.x; hand.stick.y = e.detail.y; });
+      hands.push(makeRay(hand, hand.id === "hand-left" ? "left" : "right", dot));
     });
 
     scene.addEventListener("enter-vr", function () {
@@ -216,7 +337,8 @@
     scene.addEventListener("exit-vr", function () {
       document.getElementById("rig").object3D.rotation.y = 0;   // the computer view turns the camera, not the rig
       showLabel(null);
-      vignette.visible = false;
+      vignette.visible = blackout.visible = exitBtn.visible = ringGlow.visible = false;
+      hands.forEach(hideRay);
       hideCard();
     });
   }
@@ -237,43 +359,132 @@
     }
   });
 
-  // Joystick walking (VR only). Systems tick before components, so ant-walk then pushes the rig out of walls.
+  // Pointer lines (VR only): what each controller's line points at, and how the targets look.
+  AFRAME.registerSystem("vr-pointer", {
+    init: function () {
+      this.rc = new THREE.Raycaster();
+      this.o = new THREE.Vector3(); this.d = new THREE.Vector3(); this.e = new THREE.Vector3();
+      this.c = new THREE.Vector3(); this.head = new THREE.Vector3(); this.q = new THREE.Quaternion();
+    },
+    tick: function () {
+      if (!exitBtn) return;
+      if (!vr()) { if (exitBtn.visible) { exitBtn.visible = ringGlow.visible = false; hands.forEach(hideRay); } return; }
+      exitBtn.visible = true;
+      var self = this, near = !open && window.antNearest(), ring = null, onRing = false, onExit = false, onClose = false;
+      if (near) document.querySelectorAll(".hotspot").forEach(function (el) {
+        if (el.getAttribute("hotspot").id === near) ring = el;
+      });
+      if (ring) ring.object3D.getWorldPosition(this.c);
+      scene.camera.getWorldPosition(this.head);
+      hands.forEach(function (h) {
+        var tc = h.el.components["tracked-controls"];
+        h.target = null;
+        if (!h.connected && !(tc && tc.controller)) { hideRay(h); return; }
+        var o = self.o, d = self.d, e = self.e, rc = self.rc, len = 0, x;
+        h.anchor.updateWorldMatrix(true, false);
+        h.anchor.getWorldPosition(o);
+        d.set(0, 0, -1).applyQuaternion(h.anchor.getWorldQuaternion(self.q));
+        rc.set(o, d);
+        if ((x = rc.intersectObject(exitBtn, false)[0])) { h.target = "exit"; onExit = true; len = x.distance; }
+        else if (open) {
+          len = cardDist;
+          if ((x = rc.intersectObject(cardMesh, false)[0])) {
+            len = x.distance;
+            var px = x.uv.x * 1024, py = (1 - x.uv.y) * cardH, r = closeRect;
+            if (r && px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) { h.target = "close"; onClose = true; }
+          }
+        } else if (ring) {
+          e.copy(self.c).sub(o);
+          len = e.length();
+          if (e.dot(d) / len > AIM) { h.target = "ring"; onRing = true; }
+        } else { hideRay(h); return; }
+        if (h.target === "ring") e.copy(self.c); else e.copy(d).multiplyScalar(len).add(o);   // on the ring: snap to it
+        var p = h.line.geometry.attributes.position;
+        p.setXYZ(0, o.x, o.y, o.z); p.setXYZ(1, e.x, e.y, e.z); p.needsUpdate = true;
+        h.line.material.color.set(h.target ? 0xff4fa8 : 0xffffff);
+        h.dot.position.copy(e);
+        h.dot.scale.setScalar(self.head.distanceTo(e) * 0.02);
+        h.line.visible = h.dot.visible = true;
+      });
+      setMap(exitBtn, exitTexture(onExit));
+      closeGlow.visible = onClose;
+      ringGlow.visible = onRing;
+      if (onRing) {
+        ringGlow.position.copy(this.c);
+        ringGlow.lookAt(this.head);
+        ringGlow.scale.setScalar(this.head.distanceTo(this.c) * 0.08);
+      }
+    }
+  });
+
+  // Turn the rig around the head (the ant stays on its spot).
+  function turnRig(a) {
+    var rig = document.getElementById("rig").object3D, head = new THREE.Vector3();
+    scene.camera.getWorldPosition(head);
+    rig.updateMatrixWorld(true);
+    var local = rig.worldToLocal(head.clone());
+    rig.rotation.y += a;
+    rig.updateMatrixWorld(true);
+    var now = rig.localToWorld(local);
+    rig.position.x += head.x - now.x;
+    rig.position.z += head.z - now.z;
+  }
+
+  // Left joystick walking, right joystick turning (card closed) or zoom (card open). VR only.
+  // Systems tick before components, so ant-walk then pushes the rig out of walls.
   AFRAME.registerSystem("vr-walk", {
     init: function () {
       this.v = new THREE.Vector3();
       this.q = new THREE.Quaternion();
       this.e = new THREE.Euler(0, 0, 0, "YXZ");
       this.fade = 0;
+      this.armed = true;     // a turn needs the right joystick back in the middle first
+      this.blink = -1;       // seconds into a turn's blink, -1 = none
     },
-    keys: function () {   // the joysticks as arrow keys: either hand counts
-      var k = { up: false, down: false, left: false, right: false };
-      document.querySelectorAll(".vr-hand").forEach(function (hand) {
-        var s = hand.stick || { x: 0, y: 0 }, tc = hand.components["tracked-controls"];
-        var gp = tc && tc.controller && tc.controller.gamepad;
-        if (gp && gp.axes && gp.axes.length >= 4) s = { x: gp.axes[2], y: gp.axes[3] };  // read the live value when there is one
-        if (s.y < -DEAD) k.up = true;
-        if (s.y > DEAD) k.down = true;
-        if (s.x < -DEAD) k.left = true;
-        if (s.x > DEAD) k.right = true;
-      });
-      return k;
+    stick: function (id) {
+      var hand = document.getElementById(id), s = (hand && hand.stick) || { x: 0, y: 0 };
+      var tc = hand && hand.components["tracked-controls"], gp = tc && tc.controller && tc.controller.gamepad;
+      if (gp && gp.axes && gp.axes.length >= 4) s = { x: gp.axes[2], y: gp.axes[3] };  // read the live value when there is one
+      return s;
     },
     tick: function (t, dt) {
       var v = this.v;
-      if (!vr() || !vignette) { v.set(0, 0, 0); this.fade = 0; return; }
+      if (!vr() || !vignette) { v.set(0, 0, 0); this.fade = 0; this.blink = -1; return; }
       dt = dt / 1000;
       if (dt > 0.2) { v.set(0, 0, 0); return; }   // like wasd-controls: a long pause resets the speed
-      // same easing and acceleration as wasd-controls (acceleration from the camera's wasd-controls attribute)
+
+      // right joystick
+      var rs = this.stick("hand-right");
+      if (open) {
+        this.armed = false;
+        if (Math.abs(rs.y) > 0.2) {   // up = closer (zoom in), down = farther (zoom out)
+          cardDist = Math.min(cardMax, Math.max(ZOOM_MIN, cardDist + rs.y * ZOOM_SPEED * dt));
+          cardMesh.position.z = -cardDist;
+        }
+      } else if (Math.abs(rs.x) < 0.3) this.armed = true;
+      else if (this.armed && Math.abs(rs.x) > 0.7 && this.blink < 0) {
+        this.armed = false; this.blink = 0; this.turned = false; this.dir = rs.x > 0 ? -1 : 1;
+      }
+      if (this.blink >= 0) {   // dark in 0.06 s, turn while dark, light again by 0.18 s
+        this.blink += dt;
+        if (!this.turned && this.blink >= 0.06) { turnRig(this.dir * TURN); this.turned = true; }
+        blackout.material.opacity = this.blink < 0.06 ? this.blink / 0.06 : Math.max(0, 1 - (this.blink - 0.06) / 0.12);
+        blackout.visible = true;
+        if (this.blink >= 0.18) { this.blink = -1; blackout.visible = false; }
+      }
+
+      // left joystick = arrow keys, same easing as wasd-controls, 70% of its acceleration
       var ease = Math.pow(1 / EASING, dt * 60);
       v.x *= ease; v.z *= ease;
       if (Math.abs(v.x) < 0.00001) v.x = 0;
       if (Math.abs(v.z) < 0.00001) v.z = 0;
       if (!open) {
-        var acc = document.getElementById("cam").getAttribute("wasd-controls").acceleration, k = this.keys();
-        if (k.left) v.x -= acc * dt;
-        if (k.right) v.x += acc * dt;
-        if (k.up) v.z -= acc * dt;
-        if (k.down) v.z += acc * dt;
+        var acc = document.getElementById("cam").getAttribute("wasd-controls").acceleration * VR_SPEED;
+        var s = this.stick("hand-left");
+        if (s.x < -DEAD) v.x -= acc * dt;
+        if (s.x > DEAD) v.x += acc * dt;
+        if (s.y < -DEAD) v.z -= acc * dt;
+        if (s.y > DEAD) v.z += acc * dt;
       }
       var moving = Math.hypot(v.x, v.z) > 1;
       if (v.x || v.z) {

@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+ body{margin:0;width:1100px;background:#fbfaf6;font-family:"Malgun Gothic","Segoe UI",sans-serif;color:#222}
+ h1{font-size:24px;margin:14px 20px 8px}
+ .shot{position:relative;margin:0 20px;border-radius:8px;overflow:hidden}
+ .shot img{width:100%;display:block}
+ .shot svg.ov{position:absolute;inset:0;width:100%;height:100%}
+ .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 20px}
+ .opt{background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px 12px;font-size:15px;line-height:1.55}
+ .opt h3{margin:0 0 8px;font-size:16px}
+ .demo{height:96px;border-radius:6px;background:url(11_vr_hint.png) 85% 10%/600px;display:flex;align-items:center;justify-content:center;gap:16px}
+ .btn{width:87px;height:51px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+ .btn svg{width:90%;height:90%}
+ .cap{color:#fff;font:700 12px Arial;text-shadow:0 1px 3px #000;text-align:center;margin-top:3px}
+ .n{margin:4px 20px 16px;font-size:15.5px;line-height:1.65}
+</style></head><body>
+<h1>Exit VR 수정 시안: 시야 <span style="color:#d81b70">오른쪽 위</span> · Enter VR 버튼과 같은 모양·색</h1>
+<div class="shot"><img src="11_vr_hint.png">
+ <svg class="ov" viewBox="0 0 1280 720" font-family="Arial">
+  <defs><g id="vr"><path d="M68.81,21.56H64.23v8.27h4.58a4.13,4.13,0,0,0,3.1-1.09,4.2,4.2,0,0,0,1-3,4.24,4.24,0,0,0-1-3A4.05,4.05,0,0,0,68.81,21.56Z" fill="#fff"/><path d="M96,0H12A12,12,0,0,0,0,12V50A12,12,0,0,0,12,62H96a12,12,0,0,0,12-12V12A12,12,0,0,0,96,0ZM41.9,46H34L24,16h8l6,21.84,6-21.84H52Zm39.29,0H73.44L68.15,35.39H64.23V46H57V16H68.81q5.32,0,8.34,2.37a8,8,0,0,1,3,6.69,9.68,9.68,0,0,1-1.27,5.18,8.9,8.9,0,0,1-4,3.34l6.26,12.11Z" fill="#fff"/></g></defs>
+  <rect x="470" y="484" width="340" height="54" rx="27" fill="#d81b70" stroke="#fff" stroke-width="3"/>
+  <text x="640" y="508" fill="#fff" font-size="19" font-weight="700" text-anchor="middle">✉  Read the message</text>
+  <text x="640" y="528" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">point at ✉ and pull the trigger · or press A / X</text>
+  <!-- Exit button: same as A-Frame Enter VR (black 35%, white VR mark, pink #ef2d5e when pointed at) -->
+  <line x1="1000" y1="735" x2="1162" y2="76" stroke="#ff4fa8" stroke-width="3.5"/>
+  <rect x="1110" y="44" width="104" height="60" rx="10" fill="#ef2d5e"/>
+  <use href="#vr" transform="translate(1115.4 46.9) scale(0.866)"/>
+  <g font-family="Malgun Gothic" font-size="16" font-weight="700">
+   <rect x="770" y="114" width="460" height="32" rx="8" fill="rgba(0,0,0,.72)"/><text x="1000" y="136" fill="#fff" text-anchor="middle">오른쪽 위 · 선이 닿아 분홍으로 바뀐 모습 (Enter VR과 같음)</text>
+  </g>
+ </svg></div>
+<div class="row">
+ <div class="opt"><h3>컴퓨터 화면의 Enter VR 버튼 (지금)</h3>
+  <div class="demo"><div><div class="btn" style="background:rgba(0,0,0,.35)"><svg viewBox="0 0 108 62"><use href="#vr"/></svg></div><div class="cap">평소</div></div>
+   <div><div class="btn" style="background:#ef2d5e"><svg viewBox="0 0 108 62"><use href="#vr"/></svg></div><div class="cap">마우스를 올리면</div></div></div>
+  글자 없이 흰 VR 표시만 있음. 반투명 검정 → 분홍</div>
+ <div class="opt" style="border:3px solid #2e7d32"><h3>가) 똑같이 (추천)</h3>
+  <div class="demo"><div><div class="btn" style="background:rgba(0,0,0,.35)"><svg viewBox="0 0 108 62"><use href="#vr"/></svg></div><div class="cap">평소</div></div>
+   <div><div class="btn" style="background:#ef2d5e"><svg viewBox="0 0 108 62"><use href="#vr"/></svg></div><div class="cap">선이 닿으면</div></div></div>
+  모양·색·VR 표시 모두 Enter VR과 같음. 누르면 나가기</div>
+ <div class="opt"><h3>나) 똑같이 + 아래에 Exit 글자</h3>
+  <div class="demo"><div><div class="btn" style="background:rgba(0,0,0,.35)"><svg viewBox="0 0 108 62"><use href="#vr"/></svg></div><div class="cap" style="font-size:14px">Exit</div></div>
+   <div><div class="btn" style="background:#ef2d5e"><svg viewBox="0 0 108 62"><use href="#vr"/></svg></div><div class="cap" style="font-size:14px">Exit</div></div></div>
+  버튼은 똑같고, 아래에 작은 흰 글자 Exit (무엇을 하는 버튼인지 학생이 알기 쉬움)</div>
+</div>
+<div class="n">· 버튼은 고개를 따라 늘 시야 오른쪽 위 구석에 있음. 선으로 가리키면 분홍(#ef2d5e), 방아쇠 → 컴퓨터 화면으로 돌아감. 지금의 오른쪽 아래 "Exit VR" 버튼은 없앰<br>
+· 바뀌는 것은 이 버튼뿐. 나머지(선, 카드 줌, 30° 돌기, 속도)는 그대로</div>
+<svg width="0" height="0" style="position:absolute"><defs><g id="vr2"></g></defs></svg>
+</body></html>

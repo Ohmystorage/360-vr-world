@@ -1,0 +1,83 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+ body{margin:0;width:1500px;background:#fbfaf6;font-family:"Malgun Gothic","Segoe UI",sans-serif;color:#222}
+ h1{font-size:26px;text-align:center;margin:16px 0 2px}
+ .s{text-align:center;font-size:15px;color:#555;margin-bottom:12px}
+ .g{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin:0 22px}
+ figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px}
+ .shot{position:relative;border-radius:6px;overflow:hidden}
+ .shot img{width:100%;display:block}
+ .shot svg{position:absolute;inset:0;width:100%;height:100%}
+ figcaption{font-size:17px;font-weight:700;margin:8px 4px 2px;color:#2e7d32}
+ .n{font-size:15px;font-weight:400;color:#444;line-height:1.55}
+ .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#2f4a2a;border-radius:6px;padding:14px 10px;height:405px;box-sizing:border-box;align-items:center;justify-items:center}
+ .card{position:relative;background:url(14_vr_walk_result.png) no-repeat;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+ .pill{position:absolute;left:16.8%;width:66.5%;top:87.4%;height:9%;background:#1e5bd6;border-radius:99px;color:#fff;font:700 13px Arial;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff,0 0 0 6px #ff3d9a}
+ .big .pill{font-size:21px}
+ .tag{color:#fff;font-size:14px;text-align:center;margin-top:6px}
+ .row{display:grid;grid-template-columns:600px 1fr;gap:16px;margin:16px 22px 18px}
+ .box{background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px 16px;font-size:15px;line-height:1.65}
+ .box h3{margin:0 0 6px;font-size:18px}
+ table{border-collapse:collapse;width:100%;margin-top:4px}
+ td{padding:5px 6px;border-bottom:1px solid #eee;vertical-align:top}
+ td:first-child{font-weight:700;white-space:nowrap;width:190px}
+ .new{background:#ffe3f0;color:#b0005a;border-radius:4px;padding:0 5px;font-size:12px;font-weight:700;margin-left:4px}
+ .ask{background:#fff6d6;border-left:6px solid #e0a800;padding:6px 10px;border-radius:6px;margin-top:8px}
+</style></head><body>
+<h1>Quest 고칠 점 시안: 카드 줌 · 포인터 선 + 방아쇠 · 좌우 30° 돌기 · 안에서 Exit VR · 속도 30%↓</h1>
+<div class="s">실제 세계 화면 위에 바뀔 모습을 그려 넣은 시안 · 프로젝트 파일은 아직 바꾸지 않음</div>
+<div class="g">
+ <figure><div class="shot"><img src="11_vr_hint.png">
+  <svg viewBox="0 0 1280 720" font-family="Arial">
+   <defs><radialGradient id="gl"><stop offset="0" stop-color="#ff7ab8" stop-opacity=".9"/><stop offset="1" stop-color="#ff7ab8" stop-opacity="0"/></radialGradient></defs>
+   <!-- laser from the right controller to the ring -->
+   <line x1="940" y1="735" x2="622" y2="241" stroke="#ff3d9a" stroke-width="9" stroke-linecap="round" opacity=".35"/>
+   <line x1="940" y1="735" x2="622" y2="241" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>
+   <circle cx="622" cy="241" r="46" fill="url(#gl)"/>
+   <circle cx="622" cy="241" r="24" fill="none" stroke="#fff" stroke-width="4"/>
+   <circle cx="622" cy="241" r="7" fill="#fff"/>
+   <!-- new label text -->
+   <rect x="470" y="484" width="340" height="54" rx="27" fill="#d81b70" stroke="#fff" stroke-width="3"/>
+   <text x="640" y="508" fill="#fff" font-size="19" font-weight="700" text-anchor="middle">✉  Read the message</text>
+   <text x="640" y="528" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">point at ✉ and pull the trigger · or press A / X</text>
+   <!-- Exit VR button, same place as Enter VR -->
+   <rect x="1112" y="640" width="146" height="56" rx="12" fill="rgba(0,0,0,.65)" stroke="#fff" stroke-width="2.5"/>
+   <path d="M1130 658 h40 a6 6 0 0 1 6 6 v12 a6 6 0 0 1 -6 6 h-10 l-5 -7 l-5 7 h-14 a6 6 0 0 1 -6 -6 v-12 a6 6 0 0 1 6 -6z" fill="#fff"/>
+   <text x="1186" y="676" fill="#fff" font-size="19" font-weight="700">Exit VR</text>
+   <!-- callouts -->
+   <g font-family="Malgun Gothic" font-size="17" font-weight="700">
+    <rect x="690" y="150" width="250" height="34" rx="8" fill="rgba(0,0,0,.7)"/><text x="815" y="173" fill="#fff" text-anchor="middle">선이 닿으면 고리가 빛남</text>
+    <rect x="940" y="590" width="300" height="34" rx="8" fill="rgba(0,0,0,.7)"/><text x="1090" y="613" fill="#fff" text-anchor="middle">Enter VR과 같은 자리 (오른쪽 아래)</text>
+   </g>
+  </svg></div>
+  <figcaption>① 장소 가까이 가면 컨트롤러에서 선이 나옴 <span class="n">— 선 끝이 분홍 고리에 닿으면 고리가 커지고 빛나서 "여기를 누르면 돼"를 보여 줌. 검지 방아쇠를 당기면 카드가 열림 (A/X도 그대로 됨). 고리를 맞히기 쉽게 실제 고리보다 넓게 잡음. 오른쪽 아래 <b>Exit VR</b>은 선으로 가리키고 방아쇠 → 컴퓨터 화면으로 돌아감</span></figcaption></figure>
+ <figure>
+  <div class="cards">
+   <div><div class="card" style="width:170px;height:193px;background-size:762.7px;background-position:-485px -104.7px"><div class="pill">Close</div></div><div class="tag">처음 열릴 때: 1.6 m<br>(지금 1.0 m → 더 멀리)</div></div>
+   <div class="big"><div class="card" style="width:300px;height:340.5px;background-size:1345.9px;background-position:-855.4px -184.8px"><div class="pill">Close</div></div><div class="tag">오른쪽 조이스틱 ↑ = 가까이 (줌 인)<br>↓ = 멀리 (줌 아웃) · 0.8 m ~ 3 m</div></div>
+  </div>
+  <figcaption>② 카드 줌 인 / 줌 아웃 <span class="n">— 카드가 열려 있을 때 오른쪽 조이스틱을 위로 밀면 카드가 다가오고, 아래로 밀면 멀어짐 (미는 동안 부드럽게). 닫기: 선으로 <b>Close</b>를 가리키고 방아쇠, 또는 A/X. 다음에 열 때는 다시 1.6 m</span></figcaption></figure>
+</div>
+<div class="row">
+ <div class="box"><h3>컨트롤러 버튼 (바뀐 뒤 전부)</h3>
+  <table>
+   <tr><td>왼쪽 조이스틱</td><td>걷기: 키보드 ↑↓←→와 똑같이 (위 = 보는 쪽으로 앞)</td></tr>
+   <tr><td>오른쪽 조이스틱 ← / →<span class="new">추가</span></td><td>왼쪽 30° / 오른쪽 30° 돌기 (잠깐 깜빡). 한 번 밀 때 한 번만 돎 (가운데로 돌아왔다가 다시 밀면 또 돎)</td></tr>
+   <tr><td>오른쪽 조이스틱 ↑ / ↓<span class="new">추가</span></td><td>카드가 열려 있을 때만: 줌 인 / 줌 아웃. 걸을 때는 아무 일 없음</td></tr>
+   <tr><td>방아쇠 (검지)<span class="new">추가</span></td><td>선이 가리킨 것 누르기: 분홍 고리 → 카드 열기, Close → 닫기, Exit VR → 나가기. 양손 다 됨</td></tr>
+   <tr><td>A / X</td><td>그대로: 카드 열기 / 닫기</td></tr>
+   <tr><td>헤드셋 (고개·몸)</td><td>그대로: 둘러보기</td></tr>
+  </table>
+  <div class="n" style="margin-top:8px">선은 장소 가까이, 카드가 열려 있을 때, Exit VR 버튼을 가리킬 때만 나옴 (걸을 때는 안 보여 화면이 깔끔함)</div>
+ </div>
+ <div class="box"><h3>바뀌는 것 / 그대로인 것</h3>
+  <b>헤드셋 안에서만</b><br>
+  · 걷는 속도 30% 줄임: 약 65 m/s → 약 45 m/s (acceleration 357.5 → 250, 헤드셋에서만)<br>
+  · 오른쪽 조이스틱은 이제 걷기 대신 돌기·줌 (걷기는 왼쪽 조이스틱만)<br>
+  · 30° 돌 때 내가 서 있는 자리에서 그대로 돎. 벽 규칙은 그대로<br>
+  <b>그대로</b>: 컴퓨터 화면, 키보드 속도(357.5), 장소 위치, 카드 글, A/X<br>
+  <b>확인 방법</b>: 컴퓨터에서 헤드셋 모드를 흉내 내 선·방아쇠·돌기·줌·Exit VR·속도를 확인 → GitHub에 올려 선생님이 Quest에서 확인
+  <div class="ask"><b>정한 것</b> — ① 걷기는 왼쪽 조이스틱, 돌기·줌은 오른쪽 조이스틱 (Quest 게임들과 같은 방식) ② 30° 돌 때 화면이 잠깐 깜빡임 (덜 어지럽게)</div>
+ </div>
+</div>
+</body></html>

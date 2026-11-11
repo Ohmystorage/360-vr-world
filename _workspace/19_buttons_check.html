@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+ body{margin:0;width:1300px;background:#fbfaf6;font-family:"Malgun Gothic","Segoe UI",sans-serif;color:#222}
+ h1{font-size:23px;margin:14px 20px 10px}
+ .g{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 20px}
+ figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:7px}
+ .shot{position:relative}
+ img{width:100%;display:block;border-radius:6px}
+ .mark{position:absolute;border:4px solid #ff2d7a;border-radius:10px}
+ figcaption{font-size:15px;line-height:1.6;margin:7px 3px 2px}
+ .n{margin:12px 20px 16px;font-size:15.5px;line-height:1.7;background:#fff6d6;border-left:6px solid #e0a800;padding:8px 12px;border-radius:6px}
+ .vr{display:inline-flex;width:58px;height:34px;border-radius:8px;background:rgba(0,0,0,.35);align-items:center;justify-content:center;vertical-align:middle}
+ .vr svg{width:90%;height:90%}
+</style></head><body>
+<h1>지금 우리 페이지의 버튼 확인 (GitHub Pages와 같은 파일, 컴퓨터 화면에서 찍음)</h1>
+<div class="g">
+ <figure><div class="shot"><img src="19_start_page.jpg"><div class="mark" style="right:0;top:0;width:150px;height:70px"></div></div>
+  <figcaption><b>시작 페이지 (index.html)</b> — 오른쪽 위에 버튼 없음. VR 버튼도 없음 (VR은 다음 화면에서). 페이지 안 글자 중 "VR"은 아래 알약 "VR headset = feel like a real ant!" 하나뿐</figcaption></figure>
+ <figure><div class="shot"><img src="19_world_page.jpg"><div class="mark" style="right:0;top:0;width:180px;height:180px"></div><div class="mark" style="right:6px;bottom:8px;width:56px;height:38px"></div></div>
+  <figcaption><b>가상 세계 (world.html)</b> — 오른쪽 위 = 지도. 오른쪽 아래 = A-Frame 버튼 하나: 컴퓨터에서는 전체 화면 표시, Quest에서는 <span class="vr"><svg viewBox="0 0 108 62"><path d="M68.81,21.56H64.23v8.27h4.58a4.13,4.13,0,0,0,3.1-1.09,4.2,4.2,0,0,0,1-3,4.24,4.24,0,0,0-1-3A4.05,4.05,0,0,0,68.81,21.56Z" fill="#fff"/><path d="M96,0H12A12,12,0,0,0,0,12V50A12,12,0,0,0,12,62H96a12,12,0,0,0,12-12V12A12,12,0,0,0,96,0ZM41.9,46H34L24,16h8l6,21.84,6-21.84H52Zm39.29,0H73.44L68.15,35.39H64.23V46H57V16H68.81q5.32,0,8.34,2.37a8,8,0,0,1,3,6.69,9.68,9.68,0,0,1-1.27,5.18,8.9,8.9,0,0,1-4,3.34l6.26,12.11Z" fill="#fff"/></svg></span> 표시 (글자 "Enter VR" 없음)</figcaption></figure>
+</div>
+<div class="n"><b>찾은 것</b>: 우리 코드에는 "Enter VR"이라고 쓰인 버튼이 없음 (버튼 안내 글 "Enter VR mode with a headset..."는 마우스를 올렸을 때만 뜨는 숨은 설명).<br>
+그래서 선생님이 Quest에서 본 오른쪽 위 "Enter VR"은 <b>Quest 브라우저가 스스로 띄우는 버튼</b>일 가능성이 큼 (VR을 지원하는 페이지에 브라우저가 붙이는 것이라 우리가 모양을 바꿀 수 없음). 컴퓨터에서는 그 화면을 찍을 수 없음.<br>
+Quest에서 그 화면을 스크린샷으로 찍어 보내 주시면 그 버튼과 똑같이 맞추겠습니다.</div>
+</body></html>

@@ -33,3 +33,7 @@
 - 2026-11-10: Stage 2 plan revised: A/X toggles the card, no laser/trigger/B/Y (also changes stage 1). Waiting for teacher's yes.
 - 2026-11-10: Stage 2 plan revised (both joysticks = keyboard 4 moves, no snap turn, look with head). Waiting for teacher's yes.
 - 2026-11-10: Quest stages 1 (revised: A/X only) + 2 (joystick walking) built. Simulated VR checks pass; desktop unchanged. Result image _workspace/14_vr_walk_result.png. Not pushed; not tried on a real Quest. Waiting for teacher.
+- 2026-11-10: Stages 1 + 2 pushed (05fb0b3). Waiting for the teacher's Quest test.
+- 2026-11-10: Teacher tested on a Quest: 5 fixes (card zoom, pointer line, 30 deg turns, Exit VR inside, 30% slower). Plan _workspace/15_vr_fix_plan.png approved; built in js/vr.js. Simulated VR checks pass; desktop unchanged. Result _workspace/16_vr_fix_result.png. Not pushed. Waiting for teacher.
+- 2026-11-10: Exit button moved to the top right and made to look like Enter VR (plan _workspace/17_exit_plan.png, option ga). Simulated VR checks pass. Result _workspace/18_exit_result.png. Not pushed. Waiting for teacher.
+- 2026-11-11: Exit button in the headset now reads "Exit VR" (white border, top right, plan _workspace/20_exit_text_plan.png). Simulated VR checks pass. Not pushed. Waiting for teacher.

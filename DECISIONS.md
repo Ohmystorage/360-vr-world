@@ -130,3 +130,21 @@ Decision: both thumbsticks = arrow keys (digital, same speed and feel as the key
 
 ## 2026-11-10 — Stages 1 + 2 built as the revised plan; cache-busting
 Decision: build stage 2 together with the stage 1 revision (A/X only). Added ?v=20261110 to the four local script tags in world.html. Reason: while testing, the browser kept an old js/components.js from cache; GitHub Pages and the Quest browser cache files too, and a mix of old and new files would break walking. Change the version string whenever these files change.
+
+## 2026-11-10 — Commit author for this public repo
+Decision: commits from this computer use the name Ohmystorage (repo-local git config), like the other 9 commits. Reason: the teacher chose it so the work email is not published in a public repo.
+
+## 2026-11-10 — Pointer line + trigger come back; left stick walks, right stick turns (corrects stage 2)
+Decision: near a place each controller shows a line; trigger presses the ring, Close or Exit VR; A/X kept. Left joystick = arrow keys; right joystick left/right = 30 deg snap turn with a short blink, up/down = card zoom (only while open). Reason: after the first Quest test the teacher wanted to see exactly where to click, to turn without spinning the body, a way out of VR inside the headset, and a card that is not so close. Using the right stick for turns means it can no longer walk; the teacher accepted left-stick walking (same as most Quest games). Replaces "A/X only, no lasers" and "either joystick walks, no stick turning" from earlier on 2026-11-10.
+
+## 2026-11-10 — Headset walking 70% of the keyboard
+Decision: VR acceleration = keyboard acceleration x 0.7 (about 45 m/s); keyboard stays 357.5. Reason: teacher found the headset too fast. One constant (VR_SPEED in js/vr.js).
+
+## 2026-11-10 — Easy ring aiming
+Decision: the line counts as on the ring within 7 deg of its center and snaps to it, instead of needing to hit the small ring mesh. Reason: at 100-400 m the ring is only a few degrees wide; children would miss it.
+
+## 2026-11-10 — Exit button copies the Enter VR button
+Decision: the in-headset exit button is a copy of A-Frame Enter VR button (same shape, colours, white VR mark, pink on hover), no "Exit" word, at the top right of the view. Reason: teacher asked for the same place and design as Enter VR; students already know that button. Corrects the bottom-right "Exit VR" text button from earlier the same day (I had misread "same place" as bottom right). Placed about 31 deg right / 27 deg up, not the far corner, because Quest lens edges blur.
+
+## 2026-11-11 — "Exit VR" text button instead of the VR mark
+Decision: the in-headset exit button reads "Exit VR" with a white border, top right. Reason: teacher sees an "Enter VR" text button in the Quest view and wants the same wording; a word is clearer for students than the VR mark. Replaces the 2026-11-10 VR-mark copy. Colours/font can be matched later from a Quest screenshot.
