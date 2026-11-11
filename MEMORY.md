@@ -22,7 +22,7 @@ Last updated: 2026-11-08 (How to page built)
 
 ## Next
 1. (DONE 2026-11-08) tinker site card linked and deployed (tinker-with-ai.vercel.app deploys by CLI, not git: run `vercel deploy --prod` in ai-in-k12; folder is now linked).
-2. Show the cards inside a VR headset (the intro invites headset users, but cards are HTML only). Needs a one-image plan first.
+2. Quest work, agreed with teacher 2026-11-10 (this order, one-image plan first for each): (a) walk and turn with Quest controllers (left stick walk, right stick turn; keyboard-only now, so Quest shows look-around only); (b) show the problem cards inside the headset (HTML pop-ups are invisible in VR); (c) one-page controller guide (which stick/button does what). Quest performance (~1560 draw calls at start) is NOT in this batch: check after (a)-(c).
 3. Other later work (only if asked): merge shapes for slow laptops/Quest (nest start view ~1560 draw calls); deploy on HTTPS for headsets; the other 5 places; the student design activity.
 4. Small open items: minimap cookie shape hidden under the pink dot; first place ~35 s walk from the nest (less now with the faster speed); button text "Read the message" vs problem card; at the exact start spot the nest rim hides the cookie.
 
