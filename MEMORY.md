@@ -38,6 +38,6 @@ In this folder: `python -m http.server 8123`, then open `http://localhost:8123/`
 ```
 Goal: continue the Ant's-Eye World (A-Frame VR for grades 3-5, English only), the example for the tinker site's "Prompt a 360° World" card.
 Read first: MEMORY.md, PLAN.md, DECISIONS.md, CLAUDE.md, _workspace/status.md, how-to/index.html, world.html, js/hotspots.js, then .claude/skills/ant-world-orchestrator/SKILL.md.
-First task: confirm with the teacher what is next (put the site online and fill step 5's live address, or headset cards). Show a one-image plan (PNG) before building anything.
+First task: the world is online (https://ohmystorage.github.io/360-vr-world/) and linked from the tinker site, so ask the teacher what is next (VR headset cards, or performance for slow laptops/Quest). Show a one-image plan (PNG) before building anything.
 Cautions: (1) always show a one-image plan before building and get the teacher's yes after every step; (2) do not touch walking speed (acceleration 357.5) or js/problems.js card text unless asked; stop any test server you start (port 8123 is the teacher's preview).
 ```
