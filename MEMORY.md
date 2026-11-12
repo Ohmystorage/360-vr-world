@@ -1,6 +1,6 @@
 # MEMORY.md — current snapshot (overwrite each time)
 
-Last updated: 2026-11-11 (Quest round 2 pushed and live at 899bc37)
+Last updated: 2026-11-11 (Quest round 2 live at 899bc37; intro Quest controls pop-up live at b109558)
 
 ## Done
 - 3-place test version (stages 0-5 approved, QA PASS `_workspace/05_qa-tester_report.md`):
@@ -8,7 +8,7 @@ Last updated: 2026-11-11 (Quest round 2 pushed and live at 899bc37)
   - Ant starts at a nest in the SE lawn corner. Places: bitten M&M cookie ("A Cookie Too Big", id `heavy-cracker`), doormat with a giant person, fence web.
   - Pulsing pink rings; "✉ Read the message" button within 400 m (click or Enter); English cards; minimap with check marks.
   - Keyboard walking `acceleration: 357.5` (~65 m/s).
-- Intro page `index.html` (local, not pushed: black "VR headset? See the Quest controls" button opens a pop-up with the controller guide, `_workspace/29_intro_quest_result.jpg`); How to page `how-to/`.
+- Intro page `index.html` (live at b109558: black "VR headset? See the Quest controls" button opens a pop-up with the controller guide, `_workspace/29_intro_quest_result.jpg`); How to page `how-to/`.
 - Online:
   - GitHub (public) https://github.com/Ohmystorage/360-vr-world
   - GitHub Pages https://ohmystorage.github.io/360-vr-world/
@@ -29,7 +29,7 @@ Last updated: 2026-11-11 (Quest round 2 pushed and live at 899bc37)
 
 ## Next
 1. Teacher tests round 2 on the Quest (card follow comfort, guide text size, line direction).
-2. Intro page Quest controls pop-up is built but NOT pushed; push when the teacher says so.
+2. Intro page Quest controls pop-up is live (b109558).
 3. For every fix: one plan image (PNG) first (teacher may waive), teacher's yes, build, simulated-VR check, result image, push only when asked.
 4. Stage 3: lighter scene for the Quest (measure first: ~1560 draw calls at the start view; Quest 2 target ~100-300; merge same-material small objects; VR-only lower quality; small desktop look changes OK).
 5. Later, only if asked: minimap/title in the headset, the other 5 places, the student design activity, minimap cookie under the pink dot, nest rim hiding the cookie at the start spot.
@@ -59,6 +59,6 @@ Last updated: 2026-11-11 (Quest round 2 pushed and live at 899bc37)
 ```
 Goal: make the Ant's-Eye World (A-Frame, grades 3-5) work well inside Meta Quest 2/3/3S; Quest round 2 (right-hand line only, card follows gaze, no A/X, no Read label, cards open only up close, no Exit VR / ? Controls, guide on entering VR, computer: click ✉ or Enter up close) is live on GitHub Pages (commit 899bc37).
 Read first: MEMORY.md, PLAN.md and DECISIONS.md (latest 2026-11-11 entries), CLAUDE.md, _workspace/status.md, _workspace/26_quest_fix2_plan_v3.png, _workspace/27_quest_fix2_result.png, world.html, js/vr.js, js/hotspots.js, js/components.js (ant-walk), .claude/skills/ant-world-orchestrator/SKILL.md.
-First task: git status (round 2 uncommitted; another device may have pushed); ask the teacher (in Korean) how round 2 felt on the Quest; push the intro page Quest pop-up if asked; then stage 3 (performance).
+First task: git status (round 2 uncommitted; another device may have pushed); ask the teacher (in Korean) how round 2 felt on the Quest; then stage 3 (performance).
 Cautions: (1) plan image first and the teacher's yes after every stage; "same place as Enter VR" means the headset view; student-facing text in English, chat in Korean; (2) keep keyboard speed 357.5 and js/problems.js text; bump ?v= on world.html script tags when JS changes; commit/push only when asked (never the zips or .claude/launch.json); stop any test server you start (port 8123 is the teacher's preview).
 ```
