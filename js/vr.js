@@ -1,16 +1,16 @@
 /* Ant's-Eye World - Quest 2 / 3 / 3S. Only active inside a headset (VR mode); the computer view stays the same.
-   - Cards: screen boxes do not show in a headset, so the "Read the message" label and the problem card are drawn
-     as panels in the 3D world. The card opens 1.6 m ahead; the right joystick up/down moves it closer/farther.
-   - Pointer line: near a place, while a card is open, or when pointing at Exit VR, each controller shows a line.
-     Line on the pink ring + trigger = open the card; on Close + trigger = close it; on Exit VR + trigger = leave VR.
-     A or X still opens the nearest card and closes an open one.
+   Rev 3 (teacher, Quest feedback 2026-11-11, plan _workspace/26_quest_fix2_plan_v3.png; no Exit VR / ? Controls buttons):
+   - Entering VR: the controller guide panel opens first; Close (line + trigger) closes it and walking starts.
+   - Cards: screen boxes do not show in a headset, so the card is drawn as a panel in the 3D world, 1.6 m ahead. It follows
+     the head smoothly (about 0.3 s); the right joystick up/down moves it closer/farther.
+   - Pointer line: RIGHT hand only. It shows near a pink ring (within 400 m) or while a card is open. Line on the envelope
+     + trigger = open the card, but only right in front of the place (else "Walk closer to read this!"); on Close +
+     trigger = close it. The left trigger and the A / B / X / Y buttons do nothing. Leave VR with the Meta button.
    - Walking: the LEFT joystick works like the arrow keys (up = forward where the head looks, down = back,
-     left/right = side-step) with the keyboard's feel (same easing) at 70% of its speed. The edges darken while walking.
+     left/right = side-step) with the keyboard feel (same easing) at 70% of its speed. The edges darken while walking.
    - Turning: the RIGHT joystick left/right turns 30 degrees once per push, with a short dark blink (less sickness).
-   - Exit VR: a white-bordered "Exit VR" button always at the top right of the view.
-   - "? Controls": a button left of Exit VR opens a controller guide panel (same panel style as a card); Close or A/X closes it.
    Walls: js/components.js (ant-walk) keeps the rig in the yard and out of solid things in VR too.
-   Uses window.antNearest / antReadNearest / antCloseCard and the "ant-card-open/close" and "ant-hint" events from
+   Uses window.antCanOpen / antOpenCard / antCloseCard and the "ant-card-open/close" and "ant-hint" events from
    js/hotspots.js. */
 (function () {
   var PINK = "#e0186f";
@@ -21,12 +21,12 @@
   var VR_SPEED = 0.7;        // headset walking = 70% of the keyboard speed (teacher: 30% slower)
   var TURN = Math.PI / 6;    // right joystick left/right: one 30 degree turn per push
   var AIM = Math.cos(7 * Math.PI / 180);   // the line counts as pointing at a ring within 7 degrees (easy to hit)
-  var RAY = {                // controller line start and direction (Quest 2 controller; Quest 3 sends its own)
-    left: { origin: { x: 0.0065, y: -0.0186, z: -0.05 }, direction: { x: 0.124, y: -0.594, z: -0.795 } },
-    right: { origin: { x: -0.0065, y: -0.0186, z: -0.05 }, direction: { x: -0.124, y: -0.594, z: -0.795 } }
-  };
+  var SHOW = 400;            // the line shows when a pink ring is this close (where rings draw on top of everything)
+  var FOLLOW = 0.1;          // the open card catches up with the head in about 0.3 s (time constant, s)
+  // right controller line start and direction (Quest 2 controller; Quest 3 sends its own)
+  var RAY = { origin: { x: -0.0065, y: -0.0186, z: -0.05 }, direction: { x: -0.124, y: -0.594, z: -0.795 } };
   var scene, label, labelTex = {}, card, cardMesh, closeGlow, closeRect = null, cardH = 1024;
-  var cardDist = DIST, cardMax = ZOOM_MAX, vignette, blackout, exitBtn, ctlBtn, guide = false, exitTex = {}, ringGlow, hands = [];
+  var cardDist = DIST, cardMax = ZOOM_MAX, vignette, blackout, guide = false, ringGlow, hands = [];
   var open = null, hintUntil = 0;
 
   function vr() { return !!scene && scene.is("vr-mode"); }
@@ -66,21 +66,15 @@
   }
   function setMap(mesh, t) { if (mesh.material.map !== t) { mesh.material.map = t; mesh.material.needsUpdate = true; } }
 
-  // ---- "Read the message" label (moves with the head, just below the middle of the view) ----
+  // ---- hint label, e.g. "Walk closer to read this!" (moves with the head, just below the middle of the view) ----
   function labelTexture(kind) {
     if (labelTex[kind]) return labelTex[kind];
     var cv = canvas(1024, 192), c = cv.getContext("2d");
-    c.fillStyle = kind === "read" ? "rgba(224,24,111,.95)" : "rgba(40,40,40,.88)";
+    c.fillStyle = "rgba(40,40,40,.88)";
     rr(c, 8, 8, 1008, 176, 88); c.fill();
     c.strokeStyle = "#fff"; c.lineWidth = 8; rr(c, 8, 8, 1008, 176, 88); c.stroke();
     c.fillStyle = "#fff"; c.textAlign = "center";
-    if (kind === "read") {
-      c.font = "bold 62px Arial"; c.fillText("✉  Read the message", 512, 86);
-      var how = "point at ✉ and pull the trigger · or press A / X";
-      fit(c, how, 42, 900); c.fillText(how, 512, 148);
-    } else {
-      c.font = "bold 58px Arial"; c.fillText(kind, 512, 116);
-    }
+    fit(c, kind, 58, 940); c.fillText(kind, 512, 116);
     return (labelTex[kind] = texture(cv));
   }
   function showLabel(kind) {
@@ -135,7 +129,7 @@
       c.fillStyle = "#fff"; c.font = "bold 50px Arial"; c.textAlign = "center";
       c.fillText("Close", W / 2, by + 64);
       c.fillStyle = "#666"; c.font = "34px Arial";
-      c.fillText("or press A or X   ·   right stick ↑ ↓ to zoom", W / 2, by + 144);
+      c.fillText("right stick ↑ ↓ to zoom", W / 2, by + 144);
       c.textAlign = "left";
     }
     return by + 144 + 50;
@@ -151,12 +145,12 @@
     return { tex: texture(cv), h: cv.height };
   }
 
-  // ---- controller guide panel ("? Controls" button): two controller drawings with numbers, and a list ----
+  // ---- controller guide panel (opens when entering VR): two controller drawings with numbers, and a list ----
   var BODY = { left: "M70 60 Q60 140 90 185 Q120 205 160 185 Q200 140 190 70 Q170 30 120 35 Q85 35 70 60Z",
                right: "M230 60 Q240 140 210 185 Q180 205 140 185 Q100 140 110 70 Q130 30 180 35 Q215 35 230 60Z" };
   var BADGES = {   // [number, badge x, badge y, line from x,y to x,y] in the drawing's 300 x 200 space
-    left: [[1, 35, 85, 49, 90, 83, 95], [4, 240, 75, 226, 75, 211, 72], [5, 70, 180, 84, 172, 118, 158]],
-    right: [[2, 265, 80, 251, 84, 221, 92], [3, 265, 120, 251, 116, 219, 102], [4, 60, 75, 74, 75, 90, 72], [5, 230, 180, 216, 174, 182, 158]]
+    left: [[1, 35, 85, 49, 90, 83, 95]],
+    right: [[2, 265, 80, 251, 84, 221, 92], [3, 265, 120, 251, 116, 219, 102], [4, 60, 75, 74, 75, 90, 72]]
   };
   function disc(c, x, y, r, fill, stroke) {
     c.beginPath(); c.arc(x, y, r, 0, 7); c.fillStyle = fill; c.fill();
@@ -180,7 +174,7 @@
     c.restore();
   }
   function guideTexture() {
-    var W = 1024, H = 1114, cv = canvas(W, H), c = cv.getContext("2d");
+    var W = 1024, H = 1022, cv = canvas(W, H), c = cv.getContext("2d");
     c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 30;
     c.fillStyle = "#fffdf6"; rr(c, 20, 20, 984, H - 40, 40); c.fill();
     c.shadowBlur = 0;
@@ -192,11 +186,11 @@
     c.fillText("LEFT", 287, 495); c.fillText("RIGHT", 737, 495);
     c.textAlign = "left";
     var rows = [["1", "Walk", " — left stick"], ["2", "Turn", " — right stick ← →"],
-      ["3", "Card closer / farther", " — right stick ↑ ↓"], ["4", "Point + trigger", " — press rings and buttons"],
-      ["5", "Open / close a card", " — A or X"], ["eye", "Look around", " — turn your head"]];
+      ["3", "Card closer / farther", " — right stick ↑ ↓"], ["4", "Point at ✉ + trigger", " — open a card, press Close"],
+      ["eye", "Look around", " — turn your head"]];
     rows.forEach(function (r, i) {
       var y = 560 + i * 62;
-      if (i < 5) { disc(c, 90, y - 13, 22, PINK); c.fillStyle = "#fff"; c.font = "bold 28px Arial"; c.textAlign = "center"; c.fillText(r[0], 90, y - 3); }
+      if (i < 4) { disc(c, 90, y - 13, 22, PINK); c.fillStyle = "#fff"; c.font = "bold 28px Arial"; c.textAlign = "center"; c.fillText(r[0], 90, y - 3); }
       else {   // a small drawn eye (emoji fonts are not on every browser)
         c.strokeStyle = PINK; c.lineWidth = 5; c.beginPath(); c.ellipse(90, y - 13, 24, 14, 0, 0, 7); c.stroke();
         disc(c, 90, y - 13, 8, PINK);
@@ -205,11 +199,10 @@
       var bw = c.measureText(r[1]).width;
       c.font = "38px Arial"; c.fillStyle = "#333"; c.fillText(r[2], 130 + bw, y);
     });
-    var by = 920;
+    var by = 860;
     closeRect = { x: W / 2 - 330, y: by, w: 660, h: 92 };
     c.fillStyle = "#1f5fbf"; rr(c, closeRect.x, by, 660, 92, 46); c.fill();
     c.fillStyle = "#fff"; c.font = "bold 50px Arial"; c.textAlign = "center"; c.fillText("Close", W / 2, by + 64);
-    c.fillStyle = "#666"; c.font = "34px Arial"; c.fillText("or press A or X", W / 2, by + 144);
     return { tex: texture(cv), h: H };
   }
 
@@ -229,14 +222,7 @@
     closeGlow.scale.set(1, 1 / h, 1);
     closeGlow.position.set((closeRect.x + closeRect.w / 2) / 1024 - 0.5, 0.5 - (closeRect.y + closeRect.h / 2) / t.h, 0);
     closeGlow.visible = false;
-    // in front of the eyes, level and facing the ant; it stays there (does not follow the head) until it closes
-    var head = new THREE.Vector3(), dir = new THREE.Vector3();
-    scene.camera.getWorldPosition(head); scene.camera.getWorldDirection(dir);
-    dir.y = 0;
-    if (dir.lengthSq() < 1e-6) dir.set(0, 0, -1);
-    dir.normalize();
-    card.position.copy(head);
-    card.rotation.set(0, Math.atan2(-dir.x, -dir.z), 0);
+    followCard(1);   // in front of the eyes; after that it follows the head (vr-pointer tick)
     card.visible = true;
     hotspotsVisible(false);
     showLabel(null);
@@ -248,46 +234,31 @@
     hotspotsVisible(true);
   }
 
-  // ---- A / X: open the nearest card, or close the open one ----
-  function toggleCard() {
-    if (!vr()) return;
-    if (guide) closeGuide();
-    else if (open) window.antCloseCard();
-    else if (window.antNearest()) window.antReadNearest();
-    else showHint("Walk closer to a pink ring!");
+  // The open card (or guide) keeps facing the eyes: each frame it turns part of the way toward where the head looks
+  // (left/right and up/down, no tilt), so it catches up in about 0.3 s without jerking. k = 1 jumps straight there.
+  var fq = new THREE.Quaternion(), fe = new THREE.Euler(0, 0, 0, "YXZ");
+  function followCard(k) {
+    scene.camera.getWorldPosition(card.position);
+    scene.camera.getWorldQuaternion(fq);
+    fe.setFromQuaternion(fq, "YXZ"); fe.z = 0;
+    fq.setFromEuler(fe);
+    if (k >= 1) card.quaternion.copy(fq); else card.quaternion.slerp(fq, k);
   }
 
   function closeGuide() { guide = false; hideCard(); }
-  function toggleGuide() {
-    if (!vr()) return;
-    if (guide) { closeGuide(); return; }
+  function openGuide() {
     if (open) window.antCloseCard();
     guide = true; showCard({ guide: true });
   }
 
-  // ---- trigger: press what the hand's line points at ----
+  // ---- right trigger: press what the line points at ----
   function press(h) {
     if (!vr()) return;
-    if (h.target === "exit") scene.exitVR();
-    else if (h.target === "ctl") toggleGuide();
-    else if (h.target === "close") { if (guide) closeGuide(); else window.antCloseCard(); }
-    else if (h.target === "ring") window.antReadNearest();
+    if (h.target === "close") { if (guide) closeGuide(); else window.antCloseCard(); }
+    else if (h.target === "ring") window.antOpenCard(h.ring);   // too far: hotspots.js shows "Walk closer to read this!"
   }
 
-  // ---- textures for the Exit VR button, the Close outline, the ring glow and the line's end dot ----
-  // Exit button (teacher, plan _workspace/20_exit_text_plan.png): "Exit VR" in bold white, white border,
-  // see-through black (pink #ef2d5e when a line points at it). 160 x 56 button drawn at 4x.
-  function exitTexture(hover) { return btnTexture("Exit VR", 160, hover); }
-  function btnTexture(text, w, hover) {
-    var key = text + (hover ? "+" : "");
-    if (exitTex[key]) return exitTex[key];
-    var S = 4, cv = canvas(w * S, 56 * S), c = cv.getContext("2d"), b = 3 * S;
-    c.fillStyle = hover ? "#ef2d5e" : "rgba(0,0,0,0.45)"; rr(c, b / 2, b / 2, cv.width - b, cv.height - b, 12 * S); c.fill();
-    c.strokeStyle = "#fff"; c.lineWidth = b; rr(c, b / 2, b / 2, cv.width - b, cv.height - b, 12 * S); c.stroke();
-    c.fillStyle = "#fff"; c.font = "bold " + 26 * S + "px Arial"; c.textAlign = "center"; c.textBaseline = "middle";
-    c.fillText(text, cv.width / 2, cv.height / 2 + S);
-    return (exitTex[key] = texture(cv));
-  }
+  // ---- textures for the Close outline, the ring glow and the line end dot ----
   function outlineTexture() {
     var cv = canvas(700, 130), c = cv.getContext("2d");
     c.strokeStyle = "#fff"; c.lineWidth = 10; rr(c, 12, 12, 676, 106, 53); c.stroke();
@@ -310,8 +281,8 @@
   }
 
   // ---- one pointer line per controller ----
-  function makeRay(hand, side, dot) {
-    var info = { el: hand, side: side, connected: false, target: null };
+  function makeRay(hand, dot) {
+    var info = { el: hand, connected: false, target: null, ring: null };
     info.anchor = new THREE.Object3D();             // where the line starts, in the controller's own space
     hand.object3D.add(info.anchor);
     var geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, 0, -1)]);
@@ -328,7 +299,7 @@
       info.anchor.position.set(ro.origin.x, ro.origin.y, ro.origin.z);
       info.anchor.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), new THREE.Vector3(d.x, d.y, d.z).normalize());
     }
-    aim(RAY[side]);
+    aim(RAY);
     hand.addEventListener("controllermodelready", function (e) { if (e.detail && e.detail.rayOrigin) aim(e.detail.rayOrigin); });
     hand.addEventListener("controllerconnected", function () { info.connected = true; });
     hand.addEventListener("controllerdisconnected", function () { info.connected = false; });
@@ -340,25 +311,11 @@
   // ---- set up once the scene is ready ----
   function build() {
     // label: a child of the three.js camera, so it moves with the head inside the headset
-    label = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.15), panelMat(labelTexture("read")));
+    label = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.15), panelMat(null));
     label.position.set(0, -0.42, -1.2);
     label.renderOrder = 12;
     label.visible = false;
     scene.camera.add(label);
-
-    // Exit VR: always at the top right of the view (about 37 deg right, 33 deg up; teacher wanted it higher and further right)
-    exitBtn = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.084), panelMat(exitTexture(false)));
-    exitBtn.position.set(0.76, 0.64, -1.0);
-    exitBtn.renderOrder = 14;
-    exitBtn.visible = false;
-    scene.camera.add(exitBtn);
-
-    // ? Controls: just left of Exit VR (0.30 m wide, 0.03 m gap)
-    ctlBtn = new THREE.Mesh(new THREE.PlaneGeometry(0.30, 0.084), panelMat(btnTexture("? Controls", 200, false)));
-    ctlBtn.position.set(0.46, 0.64, -1.0);
-    ctlBtn.renderOrder = 14;
-    ctlBtn.visible = false;
-    scene.camera.add(ctlBtn);
 
     // vignette: dark screen edges while walking (also follows the head)
     var cv = canvas(256, 256), c = cv.getContext("2d");
@@ -403,23 +360,21 @@
 
     var dot = dotTexture();
     document.querySelectorAll(".vr-hand").forEach(function (hand) {
-      hand.addEventListener("abuttondown", toggleCard);
-      hand.addEventListener("xbuttondown", toggleCard);
       hand.stick = { x: 0, y: 0 };
       hand.addEventListener("thumbstickmoved", function (e) { hand.stick.x = e.detail.x; hand.stick.y = e.detail.y; });
-      hands.push(makeRay(hand, hand.id === "hand-left" ? "left" : "right", dot));
+      if (hand.id === "hand-right") hands.push(makeRay(hand, dot));   // the left hand has no line
     });
 
     scene.addEventListener("enter-vr", function () {
       // start facing where the computer view was facing (A-Frame resets the camera's own turn in VR)
       var lc = document.getElementById("cam").components["look-controls"];
       document.getElementById("rig").object3D.rotation.y = lc.yawObject.rotation.y;
-      if (open) showCard(open);
+      if (open) showCard(open); else openGuide();   // the controller guide comes first every time
     });
     scene.addEventListener("exit-vr", function () {
       document.getElementById("rig").object3D.rotation.y = 0;   // the computer view turns the camera, not the rig
       showLabel(null);
-      vignette.visible = blackout.visible = exitBtn.visible = ctlBtn.visible = ringGlow.visible = false;
+      vignette.visible = blackout.visible = ringGlow.visible = false;
       guide = false;
       hands.forEach(hideRay);
       hideCard();
@@ -430,15 +385,10 @@
   document.addEventListener("ant-card-close", function () { open = null; hideCard(); });
   document.addEventListener("ant-hint", function (e) { showHint(e.detail); });
 
-  // Label: shows while a place is near and no card is open (checked 10x a second, like the Read button).
-  AFRAME.registerSystem("vr-read-label", {
-    init: function () { this.next = 0; },
-    tick: function (t) {
-      if (t < this.next || !label) return;
-      this.next = t + 100;
-      if (!vr() || busy()) { if (label.visible) showLabel(null); return; }
-      if (performance.now() < hintUntil) return;
-      showLabel(window.antNearest() ? "read" : null);
+  // Hint label: hides again after 2.5 s, or when a card opens or VR ends.
+  AFRAME.registerSystem("vr-hint", {
+    tick: function () {
+      if (label && label.visible && (!vr() || busy() || performance.now() > hintUntil)) showLabel(null);
     }
   });
 
@@ -449,55 +399,65 @@
       this.o = new THREE.Vector3(); this.d = new THREE.Vector3(); this.e = new THREE.Vector3();
       this.c = new THREE.Vector3(); this.head = new THREE.Vector3(); this.q = new THREE.Quaternion();
     },
-    tick: function () {
-      if (!exitBtn) return;
-      if (!vr()) { if (exitBtn.visible) { exitBtn.visible = ctlBtn.visible = ringGlow.visible = false; hands.forEach(hideRay); } return; }
-      exitBtn.visible = ctlBtn.visible = true;
-      var self = this, near = !busy() && window.antNearest(), ring = null, onRing = false, onExit = false, onCtl = false, onClose = false;
-      if (near) document.querySelectorAll(".hotspot").forEach(function (el) {
-        if (el.getAttribute("hotspot").id === near) ring = el;
-      });
-      if (ring) ring.object3D.getWorldPosition(this.c);
+    tick: function (t, dt) {
+      if (!card) return;
+      if (!vr()) {
+        if (ringGlow.visible || hands.some(function (h) { return h.line.visible; })) { ringGlow.visible = false; hands.forEach(hideRay); }
+        return;
+      }
+      if (card.visible) { followCard(1 - Math.exp(-Math.min(dt || 16, 100) / 1000 / FOLLOW)); card.updateMatrixWorld(true); }
+      var self = this, onRing = false, onClose = false, glowAt = null;
       scene.camera.getWorldPosition(this.head);
+      // pink rings within SHOW m of the head (none while a card is open: the rings are hidden then)
+      var rings = [];
+      if (!busy()) document.querySelectorAll(".hotspot").forEach(function (el) {
+        var p = new THREE.Vector3();
+        el.object3D.getWorldPosition(p);
+        if (Math.hypot(p.x - self.head.x, p.z - self.head.z) < SHOW) rings.push({ id: el.getAttribute("hotspot").id, p: p });
+      });
       hands.forEach(function (h) {
-        var tc = h.el.components["tracked-controls"];
-        h.target = null;
+        var tc = h.el.components["tracked-controls"], ring = null;
+        h.target = null; h.ring = null;
         if (!h.connected && !(tc && tc.controller)) { hideRay(h); return; }
         var o = self.o, d = self.d, e = self.e, rc = self.rc, len = 0, x;
         h.anchor.updateWorldMatrix(true, false);
         h.anchor.getWorldPosition(o);
         d.set(0, 0, -1).applyQuaternion(h.anchor.getWorldQuaternion(self.q));
         rc.set(o, d);
-        if ((x = rc.intersectObject(exitBtn, false)[0])) { h.target = "exit"; onExit = true; len = x.distance; }
-        else if ((x = rc.intersectObject(ctlBtn, false)[0])) { h.target = "ctl"; onCtl = true; len = x.distance; }
-        else if (busy()) {
+        if (busy()) {
           len = cardDist;
           if ((x = rc.intersectObject(cardMesh, false)[0])) {
             len = x.distance;
             var px = x.uv.x * 1024, py = (1 - x.uv.y) * cardH, r = closeRect;
             if (r && px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) { h.target = "close"; onClose = true; }
           }
-        } else if (ring) {
-          e.copy(self.c).sub(o);
-          len = e.length();
-          if (e.dot(d) / len > AIM) { h.target = "ring"; onRing = true; }
+        } else if (rings.length) {
+          var best = AIM;   // the ring closest to the line direction, within 7 degrees
+          rings.forEach(function (rg) {
+            e.copy(rg.p).sub(o);
+            var cosA = e.dot(d) / e.length();
+            if (cosA > best) { best = cosA; ring = rg; }
+          });
+          len = 3;
+          if (ring) {
+            h.target = "ring"; h.ring = ring.id;
+            if (window.antCanOpen(ring.id)) { onRing = true; glowAt = ring.p; }   // pink only where it would open
+          }
         } else { hideRay(h); return; }
-        if (h.target === "ring") e.copy(self.c); else e.copy(d).multiplyScalar(len).add(o);   // on the ring: snap to it
+        if (ring) e.copy(ring.p); else e.copy(d).multiplyScalar(len).add(o);   // on a ring: snap to it
         var p = h.line.geometry.attributes.position;
         p.setXYZ(0, o.x, o.y, o.z); p.setXYZ(1, e.x, e.y, e.z); p.needsUpdate = true;
-        h.line.material.color.set(h.target ? 0xff4fa8 : 0xffffff);
+        h.line.material.color.set(onRing || onClose ? 0xff4fa8 : 0xffffff);
         h.dot.position.copy(e);
         h.dot.scale.setScalar(self.head.distanceTo(e) * 0.02);
         h.line.visible = h.dot.visible = true;
       });
-      setMap(exitBtn, exitTexture(onExit));
-      setMap(ctlBtn, btnTexture("? Controls", 200, onCtl));
       closeGlow.visible = onClose;
       ringGlow.visible = onRing;
       if (onRing) {
-        ringGlow.position.copy(this.c);
+        ringGlow.position.copy(glowAt);
         ringGlow.lookAt(this.head);
-        ringGlow.scale.setScalar(this.head.distanceTo(this.c) * 0.08);
+        ringGlow.scale.setScalar(this.head.distanceTo(glowAt) * 0.08);
       }
     }
   });

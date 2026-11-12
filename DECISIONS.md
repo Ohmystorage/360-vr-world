@@ -163,3 +163,15 @@ Decision: the teacher calls the headset work "Quest stage 1 / 2 / 3" to avoid mi
 - Reason: the teacher said it must show in the virtual world; the information is needed after the headset is on. Button only because the teacher chose it (less in the way).
 - Reverses my first proposal (a separate `controls/` web page), which the teacher rejected as not visible in the headset.
 - Controller drawings are simple canvas shapes (no models); the "look around" row uses a drawn eye because emoji fonts are not on every browser.
+
+## 2026-11-11 — Correction: "same place as Enter VR" means the headset view
+Correction: the teacher's requests about the Exit VR button (place, look, wording) were all about what is seen inside the headset, where the Quest shows an "Enter VR" text button at the top right. I had compared with the computer page's A-Frame button (bottom right, VR mark) and twice built the wrong thing (bottom right, then a VR-mark copy). Rule from now on: Quest/VR wording questions refer to the headset view; ask for a Quest screenshot when the look must match something only visible there.
+
+## 2026-11-11 — Quest round 2: fewer buttons, open cards only up close
+- Exit VR button removed (teacher: the Meta button already leaves VR). Reverses the 2026-11-10/11 Exit VR decisions. The button had been placed ~37 deg right / 33 deg up, which is outside the round lens view of a Quest, so it was never seen; head-locked UI must stay well inside ~25 deg of the centre.
+- "? Controls" button removed (my recommendation, teacher agreed): the guide now opens automatically every time VR starts (teacher chose option (가)), so a button is not needed and cannot be hit by mistake. Re-entering VR shows it again. This reverses the other device's "button only, no auto-popup" note.
+- Only the right hand points and selects; A/X do nothing (teacher). One way to do each thing keeps it simple for grades 3-5.
+- "Read the message" label/button removed in VR and on the computer (teacher). Cards open by choosing the envelope (VR: line + trigger; computer: mouse click or Enter) only right in front of the place.
+- "Right in front" = 50 m from where the ant stops at the place's solid edge, not from the centre: the cookie (r 72) and doormat (480 x 320) are solid, so a centre distance would be unreachable or uneven by side.
+- Computer view: Enter is kept (keyboard-only students need it); the help line now says how to read. Earlier proposal to drop Enter was wrong because ✉ cannot be clicked with the keyboard.
+- Card follows the gaze smoothly (~0.3 s) instead of staying put (teacher).

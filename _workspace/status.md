@@ -38,3 +38,5 @@
 - 2026-11-10: Exit button moved to the top right and made to look like Enter VR (plan _workspace/17_exit_plan.png, option ga). Simulated VR checks pass. Result _workspace/18_exit_result.png. Not pushed. Waiting for teacher.
 - 2026-11-11: Exit button in the headset now reads "Exit VR" (white border, top right, plan _workspace/20_exit_text_plan.png). Simulated VR checks pass. Not pushed. Waiting for teacher.
 - 2026-11-11: Quest fixes pushed (63ec929), live on GitHub Pages. Waiting for the teacher's Quest test.
+- 2026-11-11: This computer synced to 05256dd (controller guide live). Teacher tried the Quest build; feedback not yet given.
+- 2026-11-11: Quest round 2 built (right-hand line only, card follows gaze, no A/X, no Read label, cards open within 50 m of the place edge, no Exit VR / ? Controls, guide opens on entering VR; computer: no Read button, click ✉ or Enter up close). Simulated checks pass. Result _workspace/27_quest_fix2_result.png. Not pushed. Waiting for teacher.

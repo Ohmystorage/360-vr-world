@@ -1,0 +1,71 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+ body{margin:0;width:1500px;background:#fbfaf6;font-family:"Malgun Gothic",sans-serif;color:#222}
+ h1{font-size:26px;text-align:center;margin:16px 0 2px}
+ .s{text-align:center;font-size:15px;color:#555;margin-bottom:12px}
+ .g{display:grid;grid-template-columns:900px 1fr;gap:18px;margin:0 22px 20px}
+ figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px}
+ .shot{position:relative;border-radius:6px;overflow:hidden;height:506px;background:#000 url(11_vr_hint.png) center/cover}
+ svg.o{position:absolute;inset:0}
+ .btn{position:absolute;height:24px;border-radius:7px;background:rgba(0,0,0,.5);border:2px solid #fff;color:#fff;font:700 12px Arial;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%)}
+ .old{opacity:.55;border-style:dashed;background:rgba(80,80,80,.4)}
+ .tag{position:absolute;font-size:13px;font-weight:700;background:#fff;border-radius:6px;padding:2px 7px;box-shadow:0 1px 4px #0006}
+ figcaption{font-size:16px;margin:8px 4px 2px;color:#444;line-height:1.5}
+ .box{background:#fff;border:1px solid #ddd;border-radius:10px;padding:7px 14px;font-size:14px;line-height:1.5;margin-bottom:7px}
+ .box h3{margin:0 0 3px;font-size:16.5px}
+ .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e0197d;color:#fff;font:800 13px Arial;margin-right:6px}
+ .q{background:#fff6d6;border-left:6px solid #e0a800}
+ code{background:#f1f1f1;border-radius:4px;padding:0 4px;font-size:13px}
+</style></head><body>
+<h1>Quest 고칠 점 시안 3: 오른손만 선 · 카드 시선 따라옴 · A/X 없앰 · 바로 앞에서 ✉ · Exit VR 없앰 · 들어가면 안내판 자동</h1>
+<div class="s">헤드셋 안 화면 그림 (글은 영어) · 컴퓨터 화면은 그대로 · 프로젝트 파일은 아직 바꾸지 않음</div>
+<div class="g">
+ <div>
+ <figure><div class="shot">
+  <svg class="o" viewBox="0 0 900 506">
+   <defs><mask id="m"><rect width="900" height="506" fill="#fff"/><ellipse cx="450" cy="253" rx="330" ry="250" fill="#000"/></mask></defs>
+   <rect width="900" height="506" fill="rgba(0,0,0,.55)" mask="url(#m)"/>
+   <ellipse cx="450" cy="253" rx="330" ry="250" fill="none" stroke="#7fd4ff" stroke-width="3" stroke-dasharray="10 7"/>
+   <!-- ring + envelope -->
+   <circle cx="300" cy="285" r="46" fill="none" stroke="#ff4fa8" stroke-width="7"/>
+   <circle cx="300" cy="285" r="58" fill="none" stroke="#ff9fd0" stroke-width="4" opacity=".8"/>
+   <rect x="280" y="271" width="40" height="28" rx="3" fill="#fff" stroke="#d4006e" stroke-width="3"/>
+   <path d="M281 273 L300 288 L319 273" fill="none" stroke="#d4006e" stroke-width="3"/>
+   <!-- right controller + line -->
+   <line x1="650" y1="470" x2="300" y2="285" stroke="#ff4fa8" stroke-width="5"/>
+   <circle cx="300" cy="285" r="7" fill="#fff" stroke="#ff4fa8" stroke-width="3"/>
+   <path d="M630 455 q30 -20 55 5 l25 45 h-70z" fill="#333" stroke="#111" stroke-width="3"/>
+   <!-- left controller: no line -->
+   <path d="M150 470 q30 -20 55 5 l20 35 h-70z" fill="#333" stroke="#111" stroke-width="3"/>
+   <line x1="175" y1="455" x2="250" y2="380" stroke="#fff" stroke-width="4" stroke-dasharray="6 6" opacity=".7"/>
+   <line x1="200" y1="395" x2="230" y2="440" stroke="#ff3030" stroke-width="5"/><line x1="230" y1="395" x2="200" y2="440" stroke="#ff3030" stroke-width="5"/>
+   <rect x="345" y="342" width="200" height="38" rx="20" fill="rgba(255,255,255,.55)"/>
+   <line x1="352" y1="344" x2="538" y2="378" stroke="#ff3030" stroke-width="6"/><line x1="538" y1="344" x2="352" y2="378" stroke="#ff3030" stroke-width="6"/>
+   <!-- arrow old -> new exit -->
+   <path d="M745 70 Q690 100 615 150" fill="none" stroke="#ffe04a" stroke-width="3" marker-end="url(#a)"/><line x1="772" y1="40" x2="852" y2="64" stroke="#ff3030" stroke-width="5"/><line x1="852" y1="40" x2="772" y2="64" stroke="#ff3030" stroke-width="5"/>
+   <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#ffe04a"/></marker></defs>
+  </svg>
+  <div class="btn old" style="left:812px;top:52px;width:86px">Exit VR</div>
+  <div class="btn old" style="left:710px;top:52px;width:104px">? Controls</div>
+  <div class="btn" style="left:582px;top:170px;width:104px">? Controls</div>
+  <div class="tag" style="left:650px;top:8px">Exit VR 없앰 (나갈 때는 Meta 버튼)</div>
+  <div class="tag" style="left:645px;top:220px">? Controls: 오른쪽 위, 시야 안 (5)</div>
+  <div class="tag" style="left:180px;top:200px">바로 앞에서 ✉ 겨누고 트리거 → 카드 (4)</div>
+  <div class="tag" style="left:360px;top:384px">"Read the message" 없어짐 (4)</div>
+  <div class="tag" style="left:560px;top:420px">오른손: 선 있음 (1)</div>
+  <div class="tag" style="left:20px;top:420px">왼손: 선 없음 (1)</div>
+ </div>
+ <figcaption>파란 점선 = 헤드셋 렌즈로 실제 보이는 대략의 둥근 시야. Exit VR은 없애고, 노란 화살표 = ? Controls만 시야 안쪽으로 옮김 (오른쪽 약 22°, 위 약 20°).</figcaption>
+ </figure>
+ </div>
+ <div>
+  <div class="box"><h3><span class="n">1</span>선은 오른손에만</h3>왼손에는 선·점이 안 나오고, 왼손 트리거는 아무 일도 안 함. 오른손 선 + 오른쪽 트리거로만 고르기 (✉, Close, ? Controls). 왼손 조이스틱 걷기는 그대로.</div>
+  <div class="box"><h3><span class="n">2</span>카드가 시선을 따라옴</h3>카드가 열려 있을 때 고개를 돌리거나 들면, 카드가 약 0.3초 동안 부드럽게 따라와 다시 정면에 섬 (좌우·위아래 모두). 급히 붙지 않게 천천히 따라와서 어지럽지 않게. 줌(오른쪽 조이스틱 ↑↓) 거리는 그대로 유지. ? Controls 안내판도 똑같이 따라옴.</div>
+  <div class="box"><h3><span class="n">3</span>A / X 버튼 기능 없앰</h3>A·X를 눌러도 아무 일 없음. 카드 열기·닫기, 안내판 닫기는 모두 트리거로. 카드 아래 <code>or press A or X</code>, 안내판의 <code>Open / close a card — A or X</code> 줄도 지움 (안내판은 5줄이 됨).</div>
+  <div class="box"><h3><span class="n">4</span>"Read the message" 문구 없앰 → ✉ 겨눠서 열기</h3>가까이 가도 분홍 문구가 뜨지 않음. 분홍 링 가운데 ✉를 오른손 선으로 겨누면 선이 분홍이 되고 링이 빛남 → 트리거 → 미션 카드가 바로 열림. <b>링 바로 앞(약 50 m, 걸어서 1초쯤, 지금의 1/8)까지 와야 열림.</b> 더 멀리서 겨누면 선은 흰색 그대로, 트리거를 당기면 아래에 "Walk closer!"만 잠깐 뜸. 링은 지금처럼 멀리서도 보임.</div>
+  <div class="box"><h3><span class="n">5</span>Exit VR 버튼과 기능 없앰</h3>나갈 때는 Meta 버튼. ? Controls 버튼 하나만 남겨 오른쪽 위 시야 안쪽(렌즈에 안 잘리는 자리)에 둠. 모양(흰 테두리, 반투명 검정, 겨누면 분홍)은 그대로. 안내판에는 Exit 관련 줄 없음.</div>
+  <div class="box" style="border:2px solid #e0197d"><h3><span class="n">6</span>들어가자마자 조작 안내판 자동으로 뜸 (가)</h3>VR에 들어갈 때마다 정면에 조작 안내판(컨트롤러 그림 + 설명 5줄)이 먼저 뜸. 월드는 어둡게, 걷기는 멈춤. 오른손 선으로 <b>Close</b>를 겨누고 트리거 → 닫히고 걷기 시작. 다시 보고 싶으면 오른쪽 위 <b>? Controls</b>. 설명 5줄: walk · turn · card closer/farther · point at ✉ + trigger (right hand) · look around.</div>
+  <div class="box q"><b>확인:</b> 컴퓨터 화면의 "Read the message" 버튼, 400 m 거리, 키보드는 그대로 둡니다 (헤드셋 안만 바뀜). 컴퓨터에서 흉내 낸 VR로 확인하고, 실제 Quest 확인은 선생님이 해 주셔야 합니다.</div>
+ </div>
+</div>
+</body></html>

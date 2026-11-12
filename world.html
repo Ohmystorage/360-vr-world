@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ant's-Eye World</title>
   <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
-  <script src="js/problems.js?v=2026111102"></script>
-  <script src="js/components.js?v=2026111102"></script>
-  <script src="js/hotspots.js?v=2026111102"></script>
-  <script src="js/vr.js?v=2026111102"></script>
+  <script src="js/problems.js?v=2026111103"></script>
+  <script src="js/components.js?v=2026111103"></script>
+  <script src="js/hotspots.js?v=2026111103"></script>
+  <script src="js/vr.js?v=2026111103"></script>
   <style>
     #title {
       position: fixed; top: 12px; left: 12px; z-index: 10;
@@ -33,7 +33,7 @@
       position: fixed; inset: 0; z-index: 10000; padding: 16px; box-sizing: border-box;  /* above A-Frame's VR button */
       display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.45);
     }
-    #card-back[hidden], #card-words-box[hidden], #hint[hidden], #read-btn[hidden] { display: none; }
+    #card-back[hidden], #card-words-box[hidden], #hint[hidden] { display: none; }
     #card {
       width: 100%; max-width: 680px; max-height: 100%; overflow-y: auto; box-sizing: border-box;
       padding: 22px 26px 0; border-radius: 14px; background: #fffdf6; color: #1a1a1a;
@@ -57,19 +57,7 @@
       border-radius: 10px; background: rgba(20, 20, 20, 0.85); color: #fff; font: bold 22px Arial, Helvetica, sans-serif;
       pointer-events: none; text-align: center; width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box;
     }
-    /* Rev 4: big "Read the message" button, shown near a place (js/hotspots.js) */
-    #read-btn {
-      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 20;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 12px 34px 10px;
-      border: 3px solid #fff; border-radius: 999px; background: #e0186f; color: #fff; cursor: pointer;
-      font: bold 26px/1.15 Arial, Helvetica, sans-serif; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    }
-    #read-btn small { font: bold 15px/1.2 Arial, Helvetica, sans-serif; opacity: 0.92; }
-    #read-btn:hover { background: #c3115e; }
-    #read-btn:focus-visible { outline: 4px solid #ffb300; outline-offset: 3px; }
     @media (max-width: 600px) {  /* lift it above A-Frame's VR button (bottom right) */
-      #read-btn { bottom: 84px; font-size: 22px; }
       #hint { bottom: 190px; }
     }
   </style>
@@ -77,7 +65,7 @@
 <body>
   <div id="title">
     <b id="place-name">Ant's-Eye World</b><br>
-    Move: arrow keys or W A S D &middot; Look: drag the mouse &middot; Read: walk to a pink ring
+    Move: arrow keys or W A S D &middot; Look: drag the mouse &middot; Read: walk up to a pink ring, then click &#9993; or press Enter
   </div>
   <div id="map">
     <canvas id="map-base" width="480" height="480"></canvas>
@@ -103,7 +91,6 @@
     </div>
   </div>
   <div id="hint" hidden></div>
-  <button id="read-btn" type="button" hidden>&#9993; Read the message<small>click or press Enter</small></button>
 
   <!-- Scale: 1 real cm = 8 scene m (x800). Ant eye = camera at y 1.6. -->
   <a-scene renderer="antialias: true; logarithmicDepthBuffer: true"
@@ -123,8 +110,8 @@
       <a-camera id="cam" position="0 1.6 0" camera="near: 0.1; far: 12000; fov: 80"
                 look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 357.5; fly: false"
                 ant-walk></a-camera>
-      <!-- Quest controllers (only appear inside a headset). js/vr.js: either joystick = arrow keys, A or X = open /
-           close the card. No lasers. -->
+      <!-- Quest controllers (only appear inside a headset). js/vr.js: left joystick walks, right joystick turns /
+           zooms the card, right-hand line + trigger opens and closes cards. -->
       <a-entity id="hand-left" class="vr-hand" meta-touch-controls="hand: left"></a-entity>
       <a-entity id="hand-right" class="vr-hand" meta-touch-controls="hand: right"></a-entity>
     </a-entity>
