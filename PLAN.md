@@ -190,3 +190,8 @@ Teacher feedback after trying the guide build: (1) line only on the right hand, 
 - `world.html`: #read-btn button and CSS removed; help line "Read: walk up to a pink ring, then click ✉ or press Enter"; hands comment updated; script tags `?v=2026111103`.
 - Checked (simulated VR + desktop): guide on entry, right trigger closes it, A/X/left trigger do nothing, card follow timing, far aim = white line + hint, near aim = pink + glow + card, desktop ✉ click and Enter near, far click hint, no console errors. Opening point measured on every walkable side: ~50 m before the ant stops (cookie 4 sides, doormat 3, web 1).
 - Next (teacher asked): show the Quest controller guide on the computer too — proposed on the intro page (index.html) next to the keyboard controls; plan image first.
+
+## 2026-11-11 — Quest controls on the intro page (built, not pushed)
+Plan _workspace/28_intro_quest_plan.png; teacher kept the place (bottom-right black pill) and dropped the "Go in / Leave" tip. Result _workspace/29_intro_quest_result.jpg.
+- `index.html`: the black "VR headset" pill is now a button "🥽 VR headset? See the Quest controls" (#qopen). It opens a pop-up (#qpop) with the same two controller drawings (numbers 1-4) and 5 rows as the in-headset guide in js/vr.js. Close button, Esc, Enter or a click outside closes it and returns focus to the button. Enter still goes into the world when the pop-up is closed. Fits a phone (375 px) with scrolling inside.
+- Checked in the browser pane: open, Close, Esc, Enter, outside click, Enter-to-world when closed, phone width (no sideways scroll).

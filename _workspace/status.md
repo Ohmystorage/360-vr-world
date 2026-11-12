@@ -40,3 +40,5 @@
 - 2026-11-11: Quest fixes pushed (63ec929), live on GitHub Pages. Waiting for the teacher's Quest test.
 - 2026-11-11: This computer synced to 05256dd (controller guide live). Teacher tried the Quest build; feedback not yet given.
 - 2026-11-11: Quest round 2 built (right-hand line only, card follows gaze, no A/X, no Read label, cards open within 50 m of the place edge, no Exit VR / ? Controls, guide opens on entering VR; computer: no Read button, click ✉ or Enter up close). Simulated checks pass. Result _workspace/27_quest_fix2_result.png. Not pushed. Waiting for teacher.
+- 2026-11-11: Round 2 pushed (899bc37), live on GitHub Pages (?v=2026111103). Waiting for the teacher's Quest test.
+- 2026-11-11: Intro page Quest controls pop-up built (black VR pill = button). Checked in the browser pane. Not pushed. Waiting for teacher.

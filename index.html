@@ -57,6 +57,29 @@
   .need { display: flex; gap: 10px; flex-wrap: wrap; }
   .vr { background: #2b2118; color: #ffd54f; }
 
+
+  /* Quest controls pop-up (teacher, plan _workspace/28_intro_quest_plan.png): same drawing and rows as the guide in the headset (js/vr.js) */
+  .qbtn { border: 0; cursor: pointer; font-family: inherit; color: #ffd54f; }
+  .qbtn u { text-underline-offset: 3px; }
+  .qbtn:hover { background: #4a3a2c; }
+  .qbtn:focus-visible { outline: 4px solid #ffd54f; outline-offset: 3px; }
+  .qback { position: fixed; inset: 0; z-index: 50; padding: 16px; box-sizing: border-box; background: rgba(30,20,10,.55);
+    display: flex; align-items: center; justify-content: center; }
+  .qback[hidden] { display: none; }
+  .qbox { width: min(620px, 100%); max-height: 100%; overflow-y: auto; box-sizing: border-box; background: #fffdf6;
+    border-radius: 22px; border-top: 8px solid #e0186f; padding: 18px 26px 20px; box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+  .qbox h2 { font-family: "Baloo 2", "Segoe UI", sans-serif; font-size: 30px; line-height: 1.1; margin: 0 0 6px; }
+  .qbox .pads { display: grid; grid-template-columns: 1fr 1fr; text-align: center; font-weight: 800; color: #5b4a3a; }
+  .qbox .pads svg { width: 100%; max-width: 210px; height: auto; }
+  .qbox ol { list-style: none; padding: 0; margin: 6px 0 4px; font-size: 18px; }
+  .qbox li { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+  .qbox .n { width: 26px; height: 26px; flex: none; border-radius: 50%; background: #e0186f; color: #fff; font-weight: 800;
+    display: grid; place-items: center; font-size: 15px; }
+  .qbox .eye { background: #fff; border: 3px solid #e0186f; box-sizing: border-box; }
+  .qbox .x { display: block; margin: 14px auto 0; background: #1f5fbf; color: #fff; border: 0; border-radius: 30px; cursor: pointer;
+    font: 800 20px Nunito, "Segoe UI", sans-serif; padding: 8px 46px; }
+  .qbox .x:focus-visible { outline: 4px solid #ffd54f; outline-offset: 3px; }
+
   @media (max-height: 640px) { .steps { bottom: 104px; } .card .ic { width: 64px; height: 64px; } .card b { font-size: 24px; } }
   /* Narrow windows: stack everything and let the page scroll instead of overlapping. */
   @media (max-width: 900px) {
@@ -123,14 +146,42 @@
   <div class="need">
     <div class="pill">&#128187; Laptop + internet</div>
     <div class="pill">&#128433; Mouse</div>
-    <div class="pill vr">&#129405; VR headset = feel like a real ant!</div>
+    <button class="pill vr qbtn" id="qopen" type="button">&#129405; VR headset? <u>See the Quest controls</u></button>
+  </div>
+</div>
+
+<div class="qback" id="qpop" hidden>
+  <div class="qbox" role="dialog" aria-modal="true" aria-labelledby="qtitle">
+    <h2 id="qtitle">Using a Quest headset?</h2>
+    <div class="pads" aria-hidden="true">
+      <div><svg viewBox="0 0 300 200"><path d="M70 60 Q60 140 90 185 Q120 205 160 185 Q200 140 190 70 Q170 30 120 35 Q85 35 70 60Z" fill="#3a3a44" stroke="#111" stroke-width="3"/><circle cx="105" cy="95" r="22" fill="#888" stroke="#111" stroke-width="3"/><circle cx="105" cy="95" r="11" fill="#bbb"/><rect x="170" y="60" width="40" height="20" fill="#555" stroke="#111" stroke-width="2"/><circle cx="150" cy="140" r="9" fill="#ddd"/><circle cx="125" cy="155" r="9" fill="#ddd"/><g font-family="Arial" font-weight="800" font-size="15" fill="#fff"><line x1="49" y1="90" x2="83" y2="95" stroke="#e0186f" stroke-width="3"/><circle cx="35" cy="85" r="14" fill="#e0186f"/><text x="35" y="91" text-anchor="middle">1</text></g></svg><br>LEFT</div>
+      <div><svg viewBox="0 0 300 200"><path d="M230 60 Q240 140 210 185 Q180 205 140 185 Q100 140 110 70 Q130 30 180 35 Q215 35 230 60Z" fill="#3a3a44" stroke="#111" stroke-width="3"/><circle cx="195" cy="95" r="22" fill="#888" stroke="#111" stroke-width="3"/><circle cx="195" cy="95" r="11" fill="#bbb"/><rect x="90" y="60" width="40" height="20" fill="#555" stroke="#111" stroke-width="2"/><circle cx="150" cy="140" r="9" fill="#ddd"/><circle cx="175" cy="155" r="9" fill="#ddd"/><g font-family="Arial" font-weight="800" font-size="15" fill="#fff"><line x1="251" y1="84" x2="221" y2="92" stroke="#e0186f" stroke-width="3"/><line x1="251" y1="116" x2="219" y2="102" stroke="#e0186f" stroke-width="3"/><line x1="74" y1="75" x2="90" y2="72" stroke="#e0186f" stroke-width="3"/><circle cx="265" cy="80" r="14" fill="#e0186f"/><text x="265" y="86" text-anchor="middle">2</text><circle cx="265" cy="120" r="14" fill="#e0186f"/><text x="265" y="126" text-anchor="middle">3</text><circle cx="60" cy="75" r="14" fill="#e0186f"/><text x="60" y="81" text-anchor="middle">4</text></g></svg><br>RIGHT</div>
+    </div>
+    <ol>
+      <li><span class="n">1</span><span><b>Walk</b> &mdash; left stick</span></li>
+      <li><span class="n">2</span><span><b>Turn</b> &mdash; right stick &larr; &rarr;</span></li>
+      <li><span class="n">3</span><span><b>Card closer / farther</b> &mdash; right stick &uarr; &darr;</span></li>
+      <li><span class="n">4</span><span><b>Point at &#9993; + trigger</b> &mdash; open a card, press Close</span></li>
+      <li><span class="n eye" aria-hidden="true"><svg width="16" height="12" viewBox="0 0 16 12"><ellipse cx="8" cy="6" rx="7" ry="4.5" fill="none" stroke="#e0186f" stroke-width="2"/><circle cx="8" cy="6" r="2.4" fill="#e0186f"/></svg></span><span><b>Look around</b> &mdash; turn your head</span></li>
+    </ol>
+    <button class="x" id="qclose" type="button">Close</button>
   </div>
 </div>
 
 <script>
-  // Enter key on this page also goes in (same key students use to read messages inside).
+  // Quest controls pop-up: the black VR button opens it; Close, Esc, Enter or a click outside closes it.
+  var pop = document.getElementById("qpop"), openBtn = document.getElementById("qopen");
+  function closePop() { pop.hidden = true; openBtn.focus(); }
+  openBtn.addEventListener("click", function () { pop.hidden = false; document.getElementById("qclose").focus(); });
+  document.getElementById("qclose").addEventListener("click", closePop);
+  pop.addEventListener("click", function (e) { if (e.target === pop) closePop(); });
+  // Enter key on this page also goes in (same key students use to read messages inside), unless the pop-up is open.
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && document.activeElement !== document.getElementById("enter")) location.href = "world.html";
+    if (!pop.hidden) {
+      if (e.key === "Escape" || e.key === "Enter") { e.preventDefault(); closePop(); }
+      return;
+    }
+    if (e.key === "Enter" && document.activeElement !== document.getElementById("enter") && document.activeElement !== openBtn) location.href = "world.html";
   });
 </script>
 </body>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<base href="../">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ant's-Eye World</title>
+<!-- Intro page (teacher-approved draft 4, _workspace/06_intro_plan4.png). The VR world is world.html. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: Nunito, "Segoe UI", Arial, sans-serif; color: #2b2118; overflow: hidden;
+    background: #cfe3f2 url(assets/intro-bg.png) center / cover no-repeat;
+  }
+  .fade { position: fixed; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,250,235,0) 42%, rgba(255,250,235,.55) 62%, rgba(255,250,235,.92) 78%); }
+
+  .hero { position: absolute; left: 4.4vw; top: 5vh; width: min(600px, 90vw); }
+  .tag { display: inline-block; background: #ffd54f; color: #5a3c00; font-weight: 800; font-size: 15px;
+    padding: 4px 12px; border-radius: 20px; transform: rotate(-3deg); }
+  h1 { font-family: "Baloo 2", "Segoe UI", sans-serif; font-size: clamp(48px, 9.5vh, 80px); line-height: .95;
+    margin: 10px 0 8px; color: #fff; text-shadow: 0 4px 0 #c2185b, 0 8px 18px rgba(0,0,0,.35); }
+  .sub { font-size: 22px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.45); margin-bottom: 22px; }
+
+  .enter { display: inline-flex; align-items: center; gap: 12px; border: 0; cursor: pointer; text-decoration: none;
+    background: #e0186f; color: #fff; font-family: "Baloo 2", "Segoe UI", sans-serif; font-size: 28px; font-weight: 800;
+    padding: 12px 30px 10px; border-radius: 44px; box-shadow: 0 6px 0 #9c0f4c, 0 12px 24px rgba(0,0,0,.3);
+    animation: bounce 1.8s ease-in-out infinite; }
+  .enter:hover { background: #f02a82; }
+  .enter:active { transform: translateY(5px); box-shadow: 0 1px 0 #9c0f4c, 0 6px 14px rgba(0,0,0,.3); animation: none; }
+  .enter:focus-visible { outline: 4px solid #ffd54f; outline-offset: 4px; }
+  .enter svg { width: 34px; height: 34px; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+  .ants { position: absolute; left: 0; right: 0; top: 61.5vh; height: 60px; overflow: hidden; pointer-events: none; }
+  .ants svg { position: absolute; left: 54%; animation: march 26s linear infinite; }
+  @keyframes march { from { transform: translateX(0); } to { transform: translateX(-60vw); } }
+  .ants .legs { animation: step .35s steps(2) infinite; }
+  @keyframes step { 50% { transform: translateY(1px); } }
+
+  .steps { position: absolute; left: 4.4vw; right: 4.4vw; bottom: 118px; display: flex; gap: 22px; }
+  .card { flex: 1; background: #fff; border-radius: 22px; padding: 14px 18px 14px 14px; display: flex; align-items: center;
+    gap: 14px; box-shadow: 0 8px 22px rgba(80,50,10,.18); }
+  .card .ic { width: 84px; height: 84px; flex: none; border-radius: 18px; display: grid; place-items: center; }
+  .card b { font-family: "Baloo 2", "Segoe UI", sans-serif; font-size: 30px; display: block; line-height: 1.05; }
+  .card span { font-size: 18px; font-weight: 600; color: #5b4a3a; }
+  .c1 .ic { background: #fff1c4; } .c2 .ic { background: #ffe0ee; } .c3 .ic { background: #dff3d4; }
+  .c1 b { color: #c77800; } .c2 b { color: #d81b75; } .c3 b { color: #2e8b3a; }
+
+  .bar { position: absolute; left: 4.4vw; right: 4.4vw; bottom: 26px; display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.88); border-radius: 30px;
+    padding: 8px 16px; font-weight: 800; font-size: 16px; }
+  kbd { background: #fff; border: 2px solid #cbbfa8; border-bottom-width: 4px; border-radius: 7px; padding: 1px 8px;
+    font-family: inherit; font-size: 14px; }
+  .need { display: flex; gap: 10px; flex-wrap: wrap; }
+  .vr { background: #2b2118; color: #ffd54f; }
+
+  @media (max-height: 640px) { .steps { bottom: 104px; } .card .ic { width: 64px; height: 64px; } .card b { font-size: 24px; } }
+  /* Narrow windows: stack everything and let the page scroll instead of overlapping. */
+  @media (max-width: 900px) {
+    body { overflow: auto; background-attachment: fixed; }
+    .hero, .steps, .bar { position: relative; left: auto; right: auto; top: auto; bottom: auto; margin: 0 16px; }
+    .hero { width: auto; padding-top: 24px; }
+    .ants { position: relative; top: auto; margin: 12px 0; }
+    .ants svg { left: 100%; }
+    .steps { flex-direction: column; gap: 12px; margin-bottom: 16px; }
+    .bar { padding-bottom: 24px; }
+    .fade { background: rgba(255,250,235,.35); }
+  }
+  @media (prefers-reduced-motion: reduce) { .enter, .ants svg, .ants .legs { animation: none; } }
+</style>
+</head>
+<body>
+<div class="fade"></div>
+
+<div class="hero">
+  <span class="tag">You are 800 times smaller!</span>
+  <h1>Ant's-Eye<br>World</h1>
+  <div class="sub">Walk the yard as a tiny ant.</div>
+  <a class="enter" id="enter" href="world.html">Enter the Ant's-Eye World
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#fff"/><path d="M10 7l6 5-6 5z" fill="#e0186f"/></svg></a>
+</div>
+
+<!-- marching ants on the sidewalk (one carries a cracker crumb) -->
+<div class="ants" aria-hidden="true">
+  <svg width="460" height="60" viewBox="0 0 460 60">
+    <defs>
+      <g id="ant">
+        <g class="legs" stroke="#1c1410" stroke-width="2" fill="none"><path d="M10,3 L4,13 M13,3 L13,14 M16,3 L22,13"/></g>
+        <g fill="#1c1410"><ellipse cx="0" cy="0" rx="7" ry="5.5"/><ellipse cx="12" cy="-1" rx="5" ry="4"/><ellipse cx="27" cy="-2" rx="11" ry="7.5"/></g>
+        <path d="M-4,-4 L-11,-14 M-2,-5 L-4,-16" stroke="#1c1410" stroke-width="2" fill="none"/>
+      </g>
+    </defs>
+    <use href="#ant" transform="translate(30,30)"/>
+    <use href="#ant" transform="translate(110,34)"/>
+    <g transform="translate(190,30)"><use href="#ant"/><rect x="-6" y="-21" width="16" height="10" rx="2" fill="#e0a33c"/></g>
+    <use href="#ant" transform="translate(270,33)"/>
+    <use href="#ant" transform="translate(370,31)"/>
+  </svg>
+</div>
+
+<div class="steps">
+  <div class="card c1"><div class="ic">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><path d="M6 50 Q20 40 32 46 T58 40" stroke="#c77800" stroke-width="3" stroke-dasharray="5 5" fill="none"/>
+    <g transform="translate(22,28)" fill="#1c1410"><ellipse cx="0" cy="0" rx="6" ry="5"/><ellipse cx="11" cy="-1" rx="4.5" ry="3.5"/><ellipse cx="24" cy="-2" rx="10" ry="7"/>
+    <path d="M9,3 L4,12 M12,3 L12,13 M15,3 L20,12 M-3,-4 L-9,-13" stroke="#1c1410" stroke-width="2" fill="none"/></g></svg></div>
+    <div><b>1. Explore</b><span>Walk out of your nest.</span></div></div>
+  <div class="card c2"><div class="ic">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24" fill="none" stroke="#f59cc8" stroke-width="6"/>
+    <rect x="19" y="23" width="26" height="18" rx="2" fill="#fff" stroke="#e0186f" stroke-width="2.5"/><path d="M19 24l13 9 13-9" fill="none" stroke="#e0186f" stroke-width="2.5"/></svg></div>
+    <div><b>2. Find</b><span>Read the ants' problems.</span></div></div>
+  <div class="card c3"><div class="ic">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="24" cy="24" r="13" fill="#ffd54f"/><rect x="19" y="36" width="10" height="7" rx="2" fill="#9e9e9e"/>
+    <path d="M24 4v4M8 10l3 3M40 10l-3 3" stroke="#f0b400" stroke-width="3"/>
+    <g transform="rotate(40 44 44)"><rect x="40" y="22" width="9" height="34" rx="2" fill="#4caf50"/><path d="M40 56l4.5 8 4.5-8z" fill="#f2d2a0"/><rect x="40" y="20" width="9" height="5" fill="#e57373"/></g></svg></div>
+    <div><b>3. Design</b><span>Build a helper for them!</span></div></div>
+</div>
+
+<div class="bar">
+  <div class="pill"><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> walk &nbsp;&middot;&nbsp; &#128433; look &nbsp;&middot;&nbsp; <kbd>Enter</kbd> read</div>
+  <div class="need">
+    <div class="pill">&#128187; Laptop + internet</div>
+    <div class="pill">&#128433; Mouse</div>
+    <button class="pill vr qbtn">&#129405; VR headset? <u>See the Quest controls</u></button>
+  </div>
+</div>
+
+<script>
+  // Enter key on this page also goes in (same key students use to read messages inside).
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && document.activeElement !== document.getElementById("enter")) location.href = "world.html";
+  });
+</script>
+
+<style>
+  .qbtn { border: 0; cursor: pointer; font-family: inherit; color: #ffd54f; }
+  .qbtn u { text-underline-offset: 3px; }
+  .qback { position: fixed; inset: 0; background: rgba(30,20,10,.55); display: flex; align-items: center; justify-content: center; z-index: 50; }
+  .qbox { width: min(620px, 92vw); background: #fffdf6; border-radius: 22px; border-top: 8px solid #e0186f; padding: 18px 26px 20px; box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+  .qbox h2 { font-family: "Baloo 2", sans-serif; font-size: 30px; margin: 0 0 2px; color: #2b2118; }
+  .qbox .pads { display: grid; grid-template-columns: 1fr 1fr; text-align: center; font-weight: 800; color: #5b4a3a; }
+  .qbox ol { list-style: none; padding: 0; margin: 6px 0 10px; font-size: 18px; }
+  .qbox li { display: flex; align-items: center; gap: 10px; margin: 5px 0; }
+  .qbox .n { width: 26px; height: 26px; flex: none; border-radius: 50%; background: #e0186f; color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 15px; }
+  .qbox .o { background: #fff; border: 3px solid #e0186f; color: #e0186f; }
+  .qbox .tip { background: #fff1c4; border-radius: 12px; padding: 8px 12px; font-size: 16px; font-weight: 700; color: #5a3c00; }
+  .qbox .x { display: block; margin: 12px auto 0; background: #1f5fbf; color: #fff; border: 0; border-radius: 30px; font: 800 20px Nunito, sans-serif; padding: 8px 46px; }
+</style>
+<div class="qback" id="qpop"><div class="qbox">
+  <h2>Using a Quest headset?</h2>
+  <div class="pads"><div><svg viewBox="0 0 300 200" width="210"><path d="M70 60 Q60 140 90 185 Q120 205 160 185 Q200 140 190 70 Q170 30 120 35 Q85 35 70 60Z" fill="#3a3a44" stroke="#111" stroke-width="3"/><circle cx="105" cy="95" r="22" fill="#888" stroke="#111" stroke-width="3"/><circle cx="105" cy="95" r="11" fill="#bbb"/><rect x="170" y="60" width="40" height="20" fill="#555" stroke="#111" stroke-width="2"/><circle cx="150" cy="140" r="9" fill="#ddd"/><circle cx="125" cy="155" r="9" fill="#ddd"/><g font-family="Arial" font-weight="800" font-size="15" fill="#fff"><line x1="49" y1="90" x2="83" y2="95" stroke="#e0186f" stroke-width="3"/><circle cx="35" cy="85" r="14" fill="#e0186f"/><text x="35" y="91" text-anchor="middle">1</text></g></svg><br>LEFT</div><div><svg viewBox="0 0 300 200" width="210"><path d="M230 60 Q240 140 210 185 Q180 205 140 185 Q100 140 110 70 Q130 30 180 35 Q215 35 230 60Z" fill="#3a3a44" stroke="#111" stroke-width="3"/><circle cx="195" cy="95" r="22" fill="#888" stroke="#111" stroke-width="3"/><circle cx="195" cy="95" r="11" fill="#bbb"/><rect x="90" y="60" width="40" height="20" fill="#555" stroke="#111" stroke-width="2"/><circle cx="150" cy="140" r="9" fill="#ddd"/><circle cx="175" cy="155" r="9" fill="#ddd"/><g font-family="Arial" font-weight="800" font-size="15" fill="#fff"><line x1="251" y1="84" x2="221" y2="92" stroke="#e0186f" stroke-width="3"/><line x1="251" y1="116" x2="219" y2="102" stroke="#e0186f" stroke-width="3"/><line x1="74" y1="75" x2="90" y2="72" stroke="#e0186f" stroke-width="3"/><circle cx="265" cy="80" r="14" fill="#e0186f"/><text x="265" y="86" text-anchor="middle">2</text><circle cx="265" cy="120" r="14" fill="#e0186f"/><text x="265" y="126" text-anchor="middle">3</text><circle cx="60" cy="75" r="14" fill="#e0186f"/><text x="60" y="81" text-anchor="middle">4</text></g></svg><br>RIGHT</div></div>
+  <ol>
+    <li><span class="n">1</span><b>Walk</b> &mdash; left stick</li>
+    <li><span class="n">2</span><b>Turn</b> &mdash; right stick &larr; &rarr;</li>
+    <li><span class="n">3</span><b>Card closer / farther</b> &mdash; right stick &uarr; &darr;</li>
+    <li><span class="n">4</span><b>Point at &#9993; + trigger</b> &mdash; open a card, press Close</li>
+    <li><span class="n o">&#128065;</span><b>Look around</b> &mdash; turn your head</li>
+  </ol>
+  <div class="tip">Go in: open this page in the Quest browser, press the pink <b>Enter</b> button, then <b>VR</b>. Leave: press the <b>Meta</b> button.</div>
+  <button class="x">Close</button>
+</div></div>
+</body>
+</html>

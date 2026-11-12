@@ -175,3 +175,7 @@ Correction: the teacher's requests about the Exit VR button (place, look, wordin
 - "Right in front" = 50 m from where the ant stops at the place's solid edge, not from the centre: the cookie (r 72) and doormat (480 x 320) are solid, so a centre distance would be unreachable or uneven by side.
 - Computer view: Enter is kept (keyboard-only students need it); the help line now says how to read. Earlier proposal to drop Enter was wrong because ✉ cannot be clicked with the keyboard.
 - Card follows the gaze smoothly (~0.3 s) instead of staying put (teacher).
+
+## 2026-11-11 — Quest controls on the computer: intro page pop-up
+- Shown on the intro page (where students start, and a teacher can project it), not inside world.html. The existing black "VR headset" pill became the button, so the page layout does not change (teacher kept this place).
+- Same drawing and 5 rows as the in-headset guide, so students see one picture in both places. No "how to go in / leave" line (teacher: not needed).
